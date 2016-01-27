@@ -39,7 +39,7 @@ public final class Rule {
         this.pattern = pattern;
     }
 
-    UrlTransform apply(UrlTransform urlTransform) {
+    public UrlTransform apply(UrlTransform urlTransform) {
         Utils.debug(LOGGER, "Start applying rule %d to URL '%s'.", id, urlTransform);
         Matcher matcher = pattern.matcher(urlTransform.getOriginalRequestUri());
         if (!matcher.matches()) {

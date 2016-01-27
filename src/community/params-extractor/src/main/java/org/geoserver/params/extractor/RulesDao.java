@@ -17,10 +17,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public final class RulesDao {
 
@@ -29,7 +31,7 @@ public final class RulesDao {
 
     public static List<Rule> getRules(InputStream inputStream) {
         try {
-            if(inputStream.available() == 0) {
+            if (inputStream.available() == 0) {
                 Utils.debug(LOGGER, "Rules files seems to be empty.");
                 return new ArrayList<>();
             }
@@ -58,6 +60,18 @@ public final class RulesDao {
                 rules.add(rule);
             }
             writeRules(rules, outputStream);
+        } finally {
+            Utils.closeQuietly(inputStream);
+            Utils.closeQuietly(outputStream);
+        }
+    }
+
+    public static void deleteRules(InputStream inputStream, OutputStream outputStream, String... ruleIds) {
+        try {
+            writeRules(getRules(inputStream).stream()
+                    .filter(rule -> !Arrays.stream(ruleIds)
+                            .anyMatch(ruleId -> ruleId.equals(rule.getId())))
+                    .collect(Collectors.toList()), outputStream);
         } finally {
             Utils.closeQuietly(inputStream);
             Utils.closeQuietly(outputStream);

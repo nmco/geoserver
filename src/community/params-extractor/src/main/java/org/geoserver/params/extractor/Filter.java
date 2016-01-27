@@ -36,7 +36,6 @@ public final class Filter implements GeoServerFilter, ExtensionPriority {
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
-
     }
 
     @Override
@@ -46,8 +45,12 @@ public final class Filter implements GeoServerFilter, ExtensionPriority {
                 Optional.ofNullable(httpServletRequest.getQueryString()));
         String originalRequest = urlTransform.toString();
         rules.forEach(rule -> rule.apply(urlTransform));
-        Utils.info(LOGGER, "Request '%s' transformed to '%s'.", originalRequest, urlTransform.toString());
-        chain.doFilter(new RequestWrapper(urlTransform, httpServletRequest), response);
+        if (urlTransform.haveChanged()) {
+            Utils.info(LOGGER, "Request '%s' transformed to '%s'.", originalRequest, urlTransform.toString());
+            chain.doFilter(new RequestWrapper(urlTransform, httpServletRequest), response);
+        } else {
+            chain.doFilter(request, response);
+        }
     }
 
     @Override

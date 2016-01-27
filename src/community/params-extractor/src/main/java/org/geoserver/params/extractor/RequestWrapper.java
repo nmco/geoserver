@@ -2,6 +2,7 @@ package org.geoserver.params.extractor;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -10,10 +11,10 @@ import java.util.regex.Pattern;
 
 final class RequestWrapper extends HttpServletRequestWrapper {
 
-    private static final Pattern pathInfoPattern = Pattern.compile("^/geoserver/([^/]+?).*$");
-    private static final Pattern servletPathPattern = Pattern.compile("^/geoserver/[^/]+?/([^/]+?).*$");
-
     private final UrlTransform urlTransform;
+
+    private final Pattern pathInfoPattern;
+    private final Pattern servletPathPattern;
 
     private final String pathInfo;
     private final String servletPath;
@@ -23,6 +24,8 @@ final class RequestWrapper extends HttpServletRequestWrapper {
     public RequestWrapper(UrlTransform urlTransform, HttpServletRequest request) {
         super(request);
         this.urlTransform = urlTransform;
+        pathInfoPattern = Pattern.compile("^" + request.getContextPath() + "([^/]+?).*$");
+        servletPathPattern = Pattern.compile("^" + request.getContextPath() + "[^/]+?/([^/]+?).*$");
         pathInfo = extractPathInfo(urlTransform.getOriginalRequestUri());
         servletPath = extractServletPath(urlTransform.getOriginalRequestUri());
         parameters = new HashMap<>(super.getParameterMap());
@@ -37,6 +40,16 @@ final class RequestWrapper extends HttpServletRequestWrapper {
     @Override
     public String getServletPath() {
         return servletPath;
+    }
+
+    @Override
+    public String getRequestURI() {
+        return urlTransform.getRequestUri();
+    }
+
+    @Override
+    public String getQueryString() {
+        return urlTransform.getQueryString();
     }
 
     @Override
@@ -55,7 +68,7 @@ final class RequestWrapper extends HttpServletRequestWrapper {
 
     @Override
     public Enumeration<String> getParameterNames() {
-        return super.getParameterNames();
+        return Collections.enumeration(parameters.keySet());
     }
 
     @Override

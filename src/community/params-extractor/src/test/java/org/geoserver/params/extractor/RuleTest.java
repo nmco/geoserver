@@ -35,9 +35,11 @@ public class RuleTest {
                 .build();
         UrlTransform urlTransform = new UrlTransform("/geoserver/tiger/wms/H11/D68", Optional.of("REQUEST=GetMap"));
         ruleA.apply(urlTransform);
-        assertThat(urlTransform.toString(), is("/geoserver/tiger/wms/D68?REQUEST=GetMap&CQL_FILTER=CFCC='H11'"));
+        assertThat(urlTransform.toString(),
+                is("/geoserver/tiger/wms/D68?REQUEST=GetMap&CQL_FILTER=CFCC%3D%27H11%27"));
         ruleB.apply(urlTransform);
-        assertThat(urlTransform.toString(), is("/geoserver/tiger/wms?REQUEST=GetMap&CQL_FILTER=CFCC='H11' AND CFCC='D68'"));
+        assertThat(urlTransform.toString(),
+                is("/geoserver/tiger/wms?REQUEST=GetMap&CQL_FILTER=CFCC%3D%27H11%27+AND+CFCC%3D%27D68%27"));
     }
 
     @Test
@@ -49,6 +51,7 @@ public class RuleTest {
                 .build();
         UrlTransform urlTransform = new UrlTransform("/geoserver/tiger/wms/H11/D68", Optional.of("REQUEST=GetMap"));
         rule.apply(urlTransform);
-        assertThat(urlTransform.toString(), is("/geoserver/tiger/wms?REQUEST=GetMap&CQL_FILTER=CFCC='H11' AND CFCC='D68'"));
+        assertThat(urlTransform.toString(),
+                is("/geoserver/tiger/wms?REQUEST=GetMap&CQL_FILTER=CFCC%3D%27H11%27+AND+CFCC%3D%27D68%27"));
     }
 }
