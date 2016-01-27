@@ -4,62 +4,66 @@
  */
 package org.geoserver.params.extractor;
 
-import java.util.Optional;
 import java.util.regex.Pattern;
 
-final class RuleBuilder {
+public final class RuleBuilder {
 
-    private final int id;
-
-    private Pattern match;
+    private String id;
+    private Integer position;
+    private String match;
     private String parameter;
-    private Integer remove;
     private String transform;
+    private Integer remove;
     private String combine;
 
-    public RuleBuilder(int id) {
+    private Pattern pattern;
+
+    public RuleBuilder withId(String id) {
         this.id = id;
-    }
-
-    RuleBuilder withPosition(Integer position) {
-        this.match = Pattern.compile(String.format("^(?:/[^/]*){%d}(/([^/]+)).*$", position));
         return this;
     }
 
-    RuleBuilder withMatch(String match) {
-        this.match = Pattern.compile(match);
+    public RuleBuilder withPosition(Integer position) {
+        if (position != null) {
+            this.position = position;
+            this.pattern = Pattern.compile(String.format("^(?:/[^/]*){%d}(/([^/]+)).*$", position));
+        }
         return this;
     }
 
-    RuleBuilder withParameter(String parameter) {
+    public RuleBuilder withMatch(String match) {
+        if (match != null) {
+            this.match = match;
+            this.pattern = Pattern.compile(match);
+        }
+        return this;
+    }
+
+    public RuleBuilder withParameter(String parameter) {
         this.parameter = parameter;
         return this;
     }
 
-    RuleBuilder withRemove(Integer remove) {
+    public RuleBuilder withRemove(Integer remove) {
         this.remove = remove;
         return this;
     }
 
-    RuleBuilder withTransform(String transform) {
+    public RuleBuilder withTransform(String transform) {
         this.transform = transform;
         return this;
     }
 
-    RuleBuilder withCombine(String combine) {
+    public RuleBuilder withCombine(String combine) {
         this.combine = combine;
         return this;
     }
 
-    Rule build() {
-        Utils.checkCondition(match != null,
-                "Match attribute is mandatory it cannot be NULL or EMPTY.");
-        Utils.checkCondition(parameter != null && !parameter.isEmpty(),
-                "Parameter attribute is mandatory it cannot be NULL or EMPTY.");
-        Utils.checkCondition(transform != null && !transform.isEmpty(),
-                "Transform attribute is mandatory it cannot be NULL or EMPTY.");
-        return new Rule(id, match, parameter, transform,
-                Optional.ofNullable(remove).orElse(1), Optional.ofNullable(combine)
-        );
+    public Rule build() {
+        Utils.checkCondition(id != null && !id.isEmpty(),"Rule id cannot be NULL or EMPTY.");
+        Utils.checkCondition(pattern != null,"Pattern attribute is mandatory it cannot be NULL.");
+        Utils.checkCondition(parameter != null && !parameter.isEmpty(),"Parameter attribute is mandatory it cannot be NULL or EMPTY.");
+        Utils.checkCondition(transform != null && !transform.isEmpty(),"Transform attribute is mandatory it cannot be NULL or EMPTY.");
+        return new Rule(id, position, match, parameter, transform, Utils.withDefault(remove, 1), combine, pattern);
     }
 }

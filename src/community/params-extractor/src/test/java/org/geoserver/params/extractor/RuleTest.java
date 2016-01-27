@@ -21,24 +21,34 @@ import static org.junit.Assert.assertThat;
 public class RuleTest {
 
     @Test
-    public void testParsingEmptyRules() throws Exception {
-        Rule rule = new RuleBuilder(0).withMatch("^.*?(/([^/]+?))/[^/]+$")
-                .withParameter("cql_filter")
-                .withTransform("seq='$2'")
+    public void testPositionRule() throws Exception {
+        Rule ruleA = new RuleBuilder().withId("0")
+                .withPosition(3)
+                .withParameter("CQL_FILTER")
+                .withTransform("CFCC='$2'")
                 .build();
-        UrlTransform urlTransform = new UrlTransform("geoserver/workspace/layer/K_140M/ows");
-        rule.apply(urlTransform);
-        System.out.println(urlTransform.toString());
+        Rule ruleB = new RuleBuilder().withId("1")
+                .withPosition(4)
+                .withParameter("CQL_FILTER")
+                .withTransform("CFCC='$2'")
+                .withCombine("$1 AND $2")
+                .build();
+        UrlTransform urlTransform = new UrlTransform("/geoserver/tiger/wms/H11/D68", Optional.of("REQUEST=GetMap"));
+        ruleA.apply(urlTransform);
+        assertThat(urlTransform.toString(), is("/geoserver/tiger/wms/D68?REQUEST=GetMap&CQL_FILTER=CFCC='H11'"));
+        ruleB.apply(urlTransform);
+        assertThat(urlTransform.toString(), is("/geoserver/tiger/wms?REQUEST=GetMap&CQL_FILTER=CFCC='H11' AND CFCC='D68'"));
     }
 
     @Test
-    public void testParsingEmptyRules2() throws Exception {
-        Rule rule = new RuleBuilder(0).withPosition(3)
-                .withParameter("cql_filter")
-                .withTransform("seq='$2'")
+    public void testMatchRule() throws Exception {
+        Rule rule = new RuleBuilder().withId("0")
+                .withMatch("^.*?(/([^/]+)/([^/]+))$")
+                .withParameter("CQL_FILTER")
+                .withTransform("CFCC='$2' AND CFCC='$3'")
                 .build();
-        UrlTransform urlTransform = new UrlTransform("/geoserver/workspace/layer/K_140M");
+        UrlTransform urlTransform = new UrlTransform("/geoserver/tiger/wms/H11/D68", Optional.of("REQUEST=GetMap"));
         rule.apply(urlTransform);
-        System.out.println(urlTransform.toString());
+        assertThat(urlTransform.toString(), is("/geoserver/tiger/wms?REQUEST=GetMap&CQL_FILTER=CFCC='H11' AND CFCC='D68'"));
     }
 }

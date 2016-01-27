@@ -12,12 +12,10 @@ import org.geotools.util.logging.Logging;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
 import java.io.IOException;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public final class Filter implements GeoServerFilter, ExtensionPriority {
 
@@ -27,8 +25,8 @@ public final class Filter implements GeoServerFilter, ExtensionPriority {
 
     public Filter(ResourceStore dataDirectory) {
         Resource resource = dataDirectory.get("rules.xml");
-        rules = Parser.parse(resource.in());
-        resource.addListener(notify -> rules = Parser.parse(resource.in()));
+        rules = RulesDao.getRules(resource.in());
+        resource.addListener(notify -> rules = RulesDao.getRules(resource.in()));
     }
 
     @Override
@@ -43,87 +41,16 @@ public final class Filter implements GeoServerFilter, ExtensionPriority {
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        Utils.info(LOGGER, "Start processing request path !");
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
         UrlTransform urlTransform = new UrlTransform(httpServletRequest.getRequestURI(),
                 Optional.ofNullable(httpServletRequest.getQueryString()));
+        String originalRequest = urlTransform.toString();
         rules.forEach(rule -> rule.apply(urlTransform));
-        chain.doFilter(new Wrapper(urlTransform, httpServletRequest), response);
+        Utils.info(LOGGER, "Request '%s' transformed to '%s'.", originalRequest, urlTransform.toString());
+        chain.doFilter(new RequestWrapper(urlTransform, httpServletRequest), response);
     }
 
     @Override
     public void destroy() {
-    }
-
-    private static class Wrapper extends HttpServletRequestWrapper {
-
-        private static final Pattern pathInfoPattern = Pattern.compile("^/geoserver/([^/]+?).*$");
-        private static final Pattern servletPathPattern = Pattern.compile("^/geoserver/[^/]+?/([^/]+?).*$");
-
-        private final UrlTransform urlTransform;
-
-        private final String pathInfo;
-        private final String servletPath;
-
-        private final Map<String, String[]> parameters;
-
-        public Wrapper(UrlTransform urlTransform, HttpServletRequest request) {
-            super(request);
-            this.urlTransform = urlTransform;
-            pathInfo = extractPathInfo(urlTransform.getRequestUri());
-            servletPath = extractServletPath(urlTransform.getRequestUri());
-            parameters = new HashMap<String, String[]>(super.getParameterMap());
-            parameters.putAll(urlTransform.getParameters());
-        }
-
-        @Override
-        public String getPathInfo() {
-            return pathInfo;
-        }
-
-        @Override
-        public String getServletPath() {
-            return servletPath;
-        }
-
-        @Override
-        public String getParameter(String name) {
-            String[] value = parameters.get(name);
-            if (value != null) {
-                return value[0];
-            }
-            return null;
-        }
-
-        @Override
-        public Map<String, String[]> getParameterMap() {
-            return parameters;
-        }
-
-        @Override
-        public Enumeration<String> getParameterNames() {
-            return super.getParameterNames();
-        }
-
-        @Override
-        public String[] getParameterValues(final String name) {
-            return getParameterMap().get(name);
-        }
-
-        private String extractPathInfo(String requestUri) {
-            Matcher matcher = pathInfoPattern.matcher(requestUri);
-            if (matcher.matches()) {
-                return matcher.group(1);
-            }
-            return "";
-        }
-
-        private String extractServletPath(String requestUri) {
-            Matcher matcher = servletPathPattern.matcher(requestUri);
-            if (matcher.matches()) {
-                return matcher.group(1);
-            }
-            return "";
-        }
     }
 }

@@ -4,15 +4,6 @@
  */
 package org.geoserver.geofence.web;
 
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.logging.Level;
-
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.MultiPolygon;
@@ -43,33 +34,36 @@ import org.geoserver.web.GeoServerApplication;
 import org.geoserver.web.GeoServerSecuredPage;
 import org.geoserver.web.wicket.ParamResourceModel;
 import org.geotools.factory.CommonFactoryFinder;
-import org.opengis.filter.sort.SortOrder;
 import org.opengis.filter.FilterFactory2;
+import org.opengis.filter.sort.SortOrder;
 import org.springframework.dao.DuplicateKeyException;
 
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.*;
+import java.util.logging.Level;
+
 /**
- * 
  * Internal Geofence Rule Page
- * 
- * @author Niels Charlier
  *
+ * @author Niels Charlier
  */
 public class GeofenceRulePage extends GeoServerSecuredPage {
-    
+
     private static final long serialVersionUID = -3986495664060319256L;
-    
+
     private class RuleFormData implements Serializable {
 
         private static final long serialVersionUID = 3045099348340468123L;
-		
-	ShortRule rule;
+
+        ShortRule rule;
         RuleLimits ruleLimits;
         String allowedArea;
     }
 
     protected DropDownChoice<String> userChoice, roleChoice, serviceChoice, requestChoice, workspaceChoice, layerChoice, accessChoice;
     protected DropDownChoice<GrantType> grantTypeChoice;
-    
+
     protected TextArea<String> allowedArea;
     protected Label allowedAreaLabel;
 
@@ -91,12 +85,12 @@ public class GeofenceRulePage extends GeoServerSecuredPage {
         final Form<RuleFormData> form = new Form<RuleFormData>("form", ruleFormModel);
         add(form);
 
-        form.add(new TextField<>("priority", ruleFormModel.bind("rule.priority")).setRequired(true));
+
         form.add(roleChoice = new DropDownChoice<>("roleName", ruleFormModel.bind("rule.roleName"), getRoleNames()));
 
         roleChoice.add(new OnChangeAjaxBehavior() {
             private static final long serialVersionUID = -2880886409750911044L;
-    
+
             @Override
             protected void onUpdate(AjaxRequestTarget target) {
                 userChoice.setChoices(getUserNames(roleChoice.getConvertedInput()));
@@ -199,7 +193,7 @@ public class GeofenceRulePage extends GeoServerSecuredPage {
                     doReturn(GeofenceServerPage.class);
                 } catch (DuplicateKeyException e) {
                     error(new ResourceModel("GeofenceRulePage.duplicate").getObject());
-                } catch (Exception e){
+                } catch (Exception e) {
                     error(e);
                 }
             }
@@ -256,7 +250,7 @@ public class GeofenceRulePage extends GeoServerSecuredPage {
      * Returns a sorted list of workspace names
      */
     protected List<String> getWorkspaceNames() {
-    	
+
         SortedSet<String> resultSet = new TreeSet<String>();
         for (WorkspaceInfo ws : getCatalog().getFacade().getWorkspaces()) {
             resultSet.add(ws.getName());
@@ -270,22 +264,21 @@ public class GeofenceRulePage extends GeoServerSecuredPage {
     protected List<String> getLayerNames(String workspaceName) {
         List<String> resultSet = new ArrayList<String>();
         if (workspaceName != null) {
-        	FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2();
-        	
-        	try(CloseableIterator<ResourceInfo> it = 
-    			getCatalog().getFacade().list(ResourceInfo.class, 
-    	            Predicates.equal("store.workspace.name", workspaceName),
-    	            null, null, ff.sort("name", SortOrder.ASCENDING)))
-    	    {
-    	        while(it.hasNext()) {
-    	            resultSet.add(it.next().getName());
-    	        }
-    	    }
+            FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2();
+
+            try (CloseableIterator<ResourceInfo> it =
+                         getCatalog().getFacade().list(ResourceInfo.class,
+                                 Predicates.equal("store.workspace.name", workspaceName),
+                                 null, null, ff.sort("name", SortOrder.ASCENDING))) {
+                while (it.hasNext()) {
+                    resultSet.add(it.next().getName());
+                }
+            }
         }
-    	
+
         return resultSet;
     }
-    
+
     /**
      * Returns a sorted list of workspace names
      */
@@ -296,7 +289,7 @@ public class GeofenceRulePage extends GeoServerSecuredPage {
         }
         return new ArrayList<String>(resultSet);
     }
-    
+
     /**
      * Returns a sorted list of operation names in the specified service (or * if the workspace is *)
      */
@@ -313,22 +306,22 @@ public class GeofenceRulePage extends GeoServerSecuredPage {
         }
         return new ArrayList<String>(resultSet);
     }
-    
+
     protected List<String> getRoleNames() {
         SortedSet<String> resultSet = new TreeSet<String>();
         try {
             for (GeoServerRole role : securityManager().getRolesForAccessControl()) {
-               resultSet.add(role.getAuthority());
+                resultSet.add(role.getAuthority());
             }
         } catch (IOException e) {
             LOGGER.log(Level.WARNING, e.getLocalizedMessage(), e);
         }
         return new ArrayList<String>(resultSet);
     }
-    
+
     protected List<String> getUserNames(String roleName) {
         SortedSet<String> resultSet = new TreeSet<String>();
-        
+
         GeoServerSecurityManager securityManager = securityManager();
         try {
             if (roleName == null) {
@@ -360,7 +353,7 @@ public class GeofenceRulePage extends GeoServerSecuredPage {
         private static final long serialVersionUID = -7478943956804313995L;
 
         public Object getDisplayValue(GrantType object) {
-            return (String) new ParamResourceModel( object.name(), getPage())
+            return (String) new ParamResourceModel(object.name(), getPage())
                     .getObject();
         }
 
@@ -368,7 +361,7 @@ public class GeofenceRulePage extends GeoServerSecuredPage {
             return object.name();
         }
     }
-    
+
     /**
      * Makes sure that while rendered in mixed case, is stored in uppercase
      */
@@ -383,10 +376,10 @@ public class GeofenceRulePage extends GeoServerSecuredPage {
             return object.toUpperCase();
         }
     }
-    
+
     protected GeoServerSecurityManager securityManager() {
         return GeoServerApplication.get().getSecurityManager();
     }
-    
-    
+
+
 }

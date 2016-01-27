@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Rules>
     <Rule id="0"
-          position="3"
+          match="^.*?(/([^/]+?))/[^/]+$"
           parameter="cql_filter"
           remove="1"
           transform="seq='$2'"/>
