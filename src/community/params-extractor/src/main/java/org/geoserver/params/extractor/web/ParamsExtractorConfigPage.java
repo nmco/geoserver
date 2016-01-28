@@ -66,9 +66,13 @@ public class ParamsExtractorConfigPage extends GeoServerSecuredPage {
                     Optional<String> queryRequest = urlParts.length > 1 ? Optional.ofNullable(urlParts[1]) : Optional.empty();
                     UrlTransform urlTransform = new UrlTransform(requestUri, queryRequest);
                     rulesPanel.getSelection().stream().map(RuleModel::toRule).forEach(rule -> rule.apply(urlTransform));
-                    outputText = urlTransform.toString();
+                    if(urlTransform.haveChanged()) {
+                        outputText = urlTransform.toString();
+                    } else {
+                        outputText = "NO RULES APPLIED !";
+                    }
                 } catch (Exception exception) {
-                    outputText = exception.getMessage();
+                    outputText = "Exception: " + exception.getMessage();
                 }
                 output.setModelObject(outputText);
             }

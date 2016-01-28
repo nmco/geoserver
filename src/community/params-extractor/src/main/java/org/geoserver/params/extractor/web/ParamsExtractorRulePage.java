@@ -27,6 +27,7 @@ public class ParamsExtractorRulePage extends GeoServerSecuredPage {
         add(form);
         form.add(new NumberTextField<Integer>("position").setMinimum(1));
         form.add(new TextField<String>("match"));
+        form.add(new TextField<String>("activation"));
         form.add(new TextField<String>("parameter"));
         form.add(new TextField<String>("transform"));
         form.add(new NumberTextField<Integer>("remove").setMinimum(1));

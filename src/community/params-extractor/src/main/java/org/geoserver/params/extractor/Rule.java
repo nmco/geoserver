@@ -19,29 +19,38 @@ public final class Rule {
     private final String id;
     private final Integer position;
     private final String match;
+    private final Optional<String> activation;
     private final String parameter;
     private final String transform;
     private final Integer remove;
-
     private final Optional<String> combine;
 
-    private final Pattern pattern;
+    private final Pattern matchPattern;
+    private final Optional<Pattern> activationPattern;
 
-    public Rule(String id, Integer position, String match, String parameter,
-                String transform, Integer remove, String combine, Pattern pattern) {
+    public Rule(String id, Integer position, String match, String activation, String parameter,
+                String transform, Integer remove, String combine, Pattern matchPattern, Pattern activationPattern) {
         this.id = id;
         this.position = position;
         this.match = match;
+        this.activation = Optional.ofNullable(activation);
         this.parameter = parameter;
         this.transform = transform;
         this.remove = remove;
         this.combine = Optional.ofNullable(combine);
-        this.pattern = pattern;
+        this.matchPattern = matchPattern;
+        this.activationPattern = Optional.ofNullable(activationPattern);
     }
 
     public UrlTransform apply(UrlTransform urlTransform) {
         Utils.debug(LOGGER, "Start applying rule %d to URL '%s'.", id, urlTransform);
-        Matcher matcher = pattern.matcher(urlTransform.getOriginalRequestUri());
+        if (activationPattern.isPresent()) {
+            if (!activationPattern.get().matcher(urlTransform.getOriginalRequestUri()).matches()) {
+                Utils.debug(LOGGER, "Rule %d doesn't apply to URL '%s'.", id, urlTransform);
+                return urlTransform;
+            }
+        }
+        Matcher matcher = matchPattern.matcher(urlTransform.getOriginalRequestUri());
         if (!matcher.matches()) {
             Utils.debug(LOGGER, "Rule %d doesn't match URL '%s'.", id, urlTransform);
             return urlTransform;
@@ -61,6 +70,10 @@ public final class Rule {
 
     public String getMatch() {
         return match;
+    }
+
+    public String getActivation() {
+        return activation.orElse(null);
     }
 
     public String getParameter() {

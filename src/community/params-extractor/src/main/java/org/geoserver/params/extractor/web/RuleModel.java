@@ -14,6 +14,7 @@ public class RuleModel implements Serializable {
 
     private Integer position;
     private String match;
+    private String activation;
     private String parameter;
     private String transform;
     private Integer remove;
@@ -27,6 +28,7 @@ public class RuleModel implements Serializable {
         id = rule.getId();
         position = rule.getPosition();
         match = rule.getMatch();
+        activation = rule.getActivation();
         parameter = rule.getParameter();
         transform = rule.getTransform();
         remove = rule.getRemove();
@@ -37,6 +39,7 @@ public class RuleModel implements Serializable {
         return new RuleBuilder().withId(id)
                 .withPosition(position)
                 .withMatch(match)
+                .withActivation(activation)
                 .withParameter(parameter)
                 .withTransform(transform)
                 .withRemove(remove)
@@ -66,6 +69,14 @@ public class RuleModel implements Serializable {
 
     public void setMatch(String match) {
         this.match = match;
+    }
+
+    public String getActivation() {
+        return activation;
+    }
+
+    public void setActivation(String activation) {
+        this.activation = activation;
     }
 
     public String getParameter() {

@@ -103,6 +103,7 @@ public final class RulesDao {
             writeAttribute("id", rule.getId(), output);
             writeAttribute("position", rule.getPosition(), output);
             writeAttribute("match", rule.getMatch(), output);
+            writeAttribute("activation", rule.getActivation(), output);
             writeAttribute("parameter", rule.getParameter(), output);
             writeAttribute("transform", rule.getTransform(), output);
             writeAttribute("remove", rule.getRemove(), output);
@@ -134,6 +135,7 @@ public final class RulesDao {
             getAttribute("id", attributes, ruleBuilder::withId);
             getAttribute("position", attributes, compose(Integer::valueOf, ruleBuilder::withPosition));
             getAttribute("match", attributes, ruleBuilder::withMatch);
+            getAttribute("activation", attributes, ruleBuilder::withActivation);
             getAttribute("parameter", attributes, ruleBuilder::withParameter);
             getAttribute("remove", attributes, compose(Integer::valueOf, ruleBuilder::withRemove));
             getAttribute("transform", attributes, ruleBuilder::withTransform);

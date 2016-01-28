@@ -12,11 +12,13 @@ public final class RuleBuilder {
     private Integer position;
     private String match;
     private String parameter;
+    private String activation;
     private String transform;
     private Integer remove;
     private String combine;
 
-    private Pattern pattern;
+    private Pattern matchPattern;
+    private Pattern activationPattern;
 
     public RuleBuilder withId(String id) {
         this.id = id;
@@ -26,7 +28,7 @@ public final class RuleBuilder {
     public RuleBuilder withPosition(Integer position) {
         if (position != null) {
             this.position = position;
-            this.pattern = Pattern.compile(String.format("^(?:/[^/]*){%d}(/([^/]+)).*$", position));
+            matchPattern = Pattern.compile(String.format("^(?:/[^/]*){%d}(/([^/]+)).*$", position));
         }
         return this;
     }
@@ -34,13 +36,21 @@ public final class RuleBuilder {
     public RuleBuilder withMatch(String match) {
         if (match != null) {
             this.match = match;
-            this.pattern = Pattern.compile(match);
+            matchPattern = Pattern.compile(match);
         }
         return this;
     }
 
     public RuleBuilder withParameter(String parameter) {
         this.parameter = parameter;
+        return this;
+    }
+
+    public RuleBuilder withActivation(String activation) {
+        if (activation != null) {
+            activationPattern = Pattern.compile(activation);
+            this.activation = activation;
+        }
         return this;
     }
 
@@ -60,10 +70,12 @@ public final class RuleBuilder {
     }
 
     public Rule build() {
-        Utils.checkCondition(id != null && !id.isEmpty(),"Rule id cannot be NULL or EMPTY.");
-        Utils.checkCondition(pattern != null,"Pattern attribute is mandatory it cannot be NULL.");
-        Utils.checkCondition(parameter != null && !parameter.isEmpty(),"Parameter attribute is mandatory it cannot be NULL or EMPTY.");
-        Utils.checkCondition(transform != null && !transform.isEmpty(),"Transform attribute is mandatory it cannot be NULL or EMPTY.");
-        return new Rule(id, position, match, parameter, transform, Utils.withDefault(remove, 1), combine, pattern);
+        Utils.checkCondition(position == null || match == null, "Only one of the attributes position and match can be selected.");
+        Utils.checkCondition(id != null && !id.isEmpty(), "Rule id cannot be NULL or EMPTY.");
+        Utils.checkCondition(matchPattern != null, "Both attributes position or match cannot be NULL.");
+        Utils.checkCondition(parameter != null && !parameter.isEmpty(), "Parameter attribute is mandatory it cannot be NULL or EMPTY.");
+        Utils.checkCondition(transform != null && !transform.isEmpty(), "Transform attribute is mandatory it cannot be NULL or EMPTY.");
+        return new Rule(id, position, match, activation, parameter, transform,
+                Utils.withDefault(remove, 1), combine, matchPattern, activationPattern);
     }
 }

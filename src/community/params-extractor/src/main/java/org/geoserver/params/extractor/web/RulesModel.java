@@ -19,6 +19,7 @@ public class RulesModel extends GeoServerDataProvider<RuleModel> {
     private final static List<Property<RuleModel>> PROPERTIES = Arrays.asList(
             new BeanProperty<>("Position", "position"),
             new BeanProperty<>("Match", "match"),
+            new BeanProperty<>("Activation", "activation"),
             new BeanProperty<>("Parameter", "parameter"),
             new BeanProperty<>("Transform", "transform"),
             new BeanProperty<>("Remove", "remove"),
