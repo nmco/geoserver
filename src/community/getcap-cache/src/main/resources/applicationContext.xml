@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans>
+
+    <!-- Cache manager, the singleton cache that should be used by all that need to access the cache -->
+    <bean id="getCapCacheManager" class="org.geoserver.getcapcache.CacheManager"/>
+
+    <!-- Catalog listener, responsible to listen catalog events and truncate the cache -->
+    <bean id="getCapCatalogListener" class="org.geoserver.getcapcache.CatalogListener" lazy-init="false">
+        <constructor-arg ref="catalog"/>
+        <constructor-arg ref="getCapCacheManager"/>
+    </bean>
+
+    <!-- Dispatcher call back that will be responsible to interception requests execution  -->
+    <bean id="getCapCacheDispatcherCallback" class="org.geoserver.getcapcache.DispatcherCallback">
+        <constructor-arg ref="getCapCacheManager"/>
+        <constructor-arg ref="dataDirectory"/>
+    </bean>
+
+    <!-- Cache response that can only handle values of type CacheResult -->
+    <bean id="getCapCacheResponse" class="org.geoserver.getcapcache.CacheResponse"/>
+
+    <!-- Restlet responsible to handle REST calls to the cache manager -->
+    <bean id="getCacheRestlet" class="org.geoserver.getcapcache.CacheManagerRestlet">
+        <constructor-arg ref="getCapCacheManager"/>
+    </bean>
+
+    <!-- Restlet routes mapping -->
+    <bean id="getCacheRestMappings" class="org.geoserver.rest.RESTMapping">
+        <property name="routes">
+            <map>
+                <entry>
+                    <key>
+                        <value>/getcapcache/truncate</value>
+                    </key>
+                    <value>getCacheRestlet</value>
+                </entry>
+            </map>
+        </property>
+    </bean>
+</beans>
