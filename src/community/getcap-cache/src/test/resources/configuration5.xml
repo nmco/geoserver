@@ -1,0 +1,11 @@
+<Caching enable='true'>
+    <Blacklist>
+        <SubNetMask>192.160.15.20/32</SubNetMask>
+        <SubNetMask>192.180.10.0/24</SubNetMask>
+    </Blacklist>
+    <Whitelist>
+        <SubNetMask>192.160.15.0/24</SubNetMask>
+        <SubNetMask>192.170.25.8/32</SubNetMask>
+        <SubNetMask>127.0.0.1/32</SubNetMask>
+    </Whitelist>
+</Caching>
