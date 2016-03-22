@@ -1,0 +1,6 @@
+<Caching enable='true'>
+    <Whitelist>
+        <SubNetMask>192.170.2.45/32</SubNetMask>
+        <SubNetMask>192.171.10.0/24</SubNetMask>
+    </Whitelist>
+</Caching>

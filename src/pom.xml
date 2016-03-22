@@ -51,6 +51,16 @@
  </ciManagement>
 
  <repositories>
+
+  <repository>
+   <id>geoorchesta</id>
+   <name>GeoOrchesta</name>
+   <url>http://build.georchestra.org/maven/repository</url>
+   <snapshots>
+     <enabled>true</enabled>
+   </snapshots>
+  </repository>
+
   <repository>
    <id>boundless</id>
    <name>Boundless Maven Repository</name>
