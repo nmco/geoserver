@@ -12,6 +12,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
+import java.io.File;
 import java.io.InputStream;
 import java.util.logging.Logger;
 
@@ -27,7 +28,7 @@ final class ConfigurationParser {
 
     final static String CONFIGURATION_DIRECTORY = "getcapcahe";
     final static String CONFIGURATION_FILE_NAME = "configuration.xml";
-    final static String CONFIGURATION_PATH = "getcapcahe/configuration.xml";
+    final static String CONFIGURATION_PATH = "getcapcahe" + File.separator + "configuration.xml";
 
     final static String CONFIGURATION_DEFAULT_CONTENT = "<Caching enable='true'></Caching>";
 
