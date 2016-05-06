@@ -105,6 +105,7 @@ public class LayerGroupEntryPanel extends Panel {
         }.setFilterable( false ));
         layerTable.setItemReuseStrategy(new DefaultItemReuseStrategy());
         layerTable.setOutputMarkupId( true );
+        layerTable.activateDragAndDrop();
         
         add( new AjaxLink<LayerInfo>( "addLayer" ) {
             private static final long serialVersionUID = -6143440041597461787L;

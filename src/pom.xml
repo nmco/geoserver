@@ -102,6 +102,13 @@
        <enabled>true</enabled>
      </releases>
     </repository>
+
+  <repository>
+    <id>wicket-dnd</id>
+    <name>Wicket-dnd Repository</name>
+    <url>http://wicket-dnd.googlecode.com/svn/repo</url>
+  </repository>
+
  </repositories>
 
  <dependencyManagement>
@@ -1159,6 +1166,18 @@
       <groupId>it.geosolutions.imageio-ext</groupId>
       <artifactId>imageio-ext-turbojpeg</artifactId>
       <version>${imageio-ext.version}</version>
+    </dependency>
+    <dependency>
+     <groupId>com.github.svenmeier.wicket-dnd</groupId>
+     <artifactId>wicket-dnd</artifactId>
+     <version>0.7.3</version>
+     <exclusions>
+      <!-- wicket-dnd depends on wicket 7.0 now, we use 7.1.0 -->
+      <exclusion>
+       <groupId>org.apache.wicket</groupId>
+       <artifactId>wicket-core</artifactId>
+      </exclusion>
+     </exclusions>
     </dependency>
   </dependencies>
  </dependencyManagement>

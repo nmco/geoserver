@@ -39,6 +39,12 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.model.ResourceModel;
 import org.geoserver.web.wicket.GeoServerDataProvider.Property;
+import wicketdnd.DragSource;
+import wicketdnd.DropTarget;
+import wicketdnd.Location;
+import wicketdnd.Operation;
+import wicketdnd.Transfer;
+import wicketdnd.theme.WebTheme;
 
 /**
  * An abstract filterable, sortable, pageable table with associated filtering form and paging
@@ -727,7 +733,32 @@ public abstract class GeoServerTablePanel<T> extends Panel {
             selection = new boolean[DEFAULT_ITEMS_PER_PAGE];
         }
     }
-    
-    
-    
+
+    public void activateDragAndDrop() {
+        this.add(new WebTheme());
+        this.add(new DragSource(Operation.MOVE).drag("tr"));
+        this.add(new DropTarget(Operation.MOVE) {
+
+            private static final long serialVersionUID = 1L;
+
+            public void onDrop(AjaxRequestTarget target, Transfer transfer, Location location) {
+                // checking if we have a valid dragged element and a valid drop location
+                if (location == null || transfer == null) {
+                    return;
+                }
+                // the drag and drop indexes
+                List<T> items = dataProvider.getItems();
+                int dragIndex = items.indexOf(transfer.getData());
+                int dropIndex = items.indexOf(location.getComponent().getDefaultModel().getObject());
+                // if indexes are the same or one of the indexes is invalid we do nothing
+                if (dragIndex == dropIndex || dragIndex == -1 || dropIndex == -1) {
+                    return;
+                }
+                // performing the drag and drop
+                T draggedElement = items.remove(dragIndex);
+                items.add(dropIndex, draggedElement);
+                target.add(GeoServerTablePanel.this);
+            }
+        }.dropCenter("tr"));
+    }
 }
