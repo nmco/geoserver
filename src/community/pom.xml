@@ -66,6 +66,7 @@
 	  <descriptor>release/ext-gdal-wcs.xml</descriptor>
 	  <descriptor>release/ext-gdal-wps.xml</descriptor>
 	  <descriptor>release/ext-geogig.xml</descriptor>
+          <descriptor>release/ext-gwc-sqlite.xml</descriptor> 
         </descriptors>
       </configuration>
      </plugin>
@@ -456,6 +457,12 @@
       <id>params-extractor</id>
       <modules>
         <module>params-extractor</module>
+      </modules>
+    </profile>
+    <profile>
+      <id>gwc-sqlite</id>
+      <modules>
+        <module>gwc-sqlite</module>
       </modules>
     </profile>
   </profiles>
