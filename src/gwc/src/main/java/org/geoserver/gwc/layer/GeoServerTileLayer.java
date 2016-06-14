@@ -34,8 +34,10 @@ import org.geoserver.catalog.MetadataMap;
 import org.geoserver.catalog.PublishedInfo;
 import org.geoserver.catalog.ResourceInfo;
 import org.geoserver.catalog.StyleInfo;
+import org.geoserver.catalog.WorkspaceInfo;
 import org.geoserver.gwc.GWC;
 import org.geoserver.gwc.config.GWCConfig;
+import org.geoserver.ows.LocalWorkspace;
 import org.geoserver.platform.GeoServerExtensions;
 import org.geoserver.wms.GetMapRequest;
 import org.geoserver.wms.WMS;
@@ -164,6 +166,16 @@ public class GeoServerTileLayer extends TileLayer implements ProxyLayer {
     
     @Override
     public String getName() {
+        return info.getName();
+    }
+
+    @Override
+    public String getAdvertisingName() {
+        // let's see if this a virtual service request
+        WorkspaceInfo localWorkspace = LocalWorkspace.get();
+        if (localWorkspace != null) {
+            return CatalogConfiguration.removeWorkspacePrefix(info.getName(), catalog);
+        }
         return info.getName();
     }
 

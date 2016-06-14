@@ -13,6 +13,7 @@ import static junit.framework.Assert.assertSame;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 import static org.geoserver.gwc.GWC.tileLayerName;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isA;
@@ -24,6 +25,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.awt.image.BufferedImage;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -38,19 +40,23 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.geoserver.catalog.Catalog;
 import org.geoserver.catalog.Keyword;
+import org.geoserver.catalog.LayerGroupInfo;
 import org.geoserver.catalog.LayerInfo;
 import org.geoserver.catalog.NamespaceInfo;
 import org.geoserver.catalog.PublishedInfo;
 import org.geoserver.catalog.StyleInfo;
 import org.geoserver.catalog.PublishedType;
+import org.geoserver.catalog.WorkspaceInfo;
 import org.geoserver.catalog.impl.DataStoreInfoImpl;
 import org.geoserver.catalog.impl.FeatureTypeInfoImpl;
 import org.geoserver.catalog.impl.LayerGroupInfoImpl;
 import org.geoserver.catalog.impl.LayerInfoImpl;
 import org.geoserver.catalog.impl.NamespaceInfoImpl;
 import org.geoserver.catalog.impl.StyleInfoImpl;
+import org.geoserver.catalog.impl.WorkspaceInfoImpl;
 import org.geoserver.gwc.GWC;
 import org.geoserver.gwc.config.GWCConfig;
+import org.geoserver.ows.LocalWorkspace;
 import org.geoserver.wms.WMSMapContent;
 import org.geoserver.wms.map.RenderedImageMap;
 import org.geoserver.wms.map.RenderedImageMapResponse;
@@ -68,12 +74,14 @@ import org.geowebcache.grid.GridSetBroker;
 import org.geowebcache.grid.OutsideCoverageException;
 import org.geowebcache.io.Resource;
 import org.geowebcache.layer.ExpirationRule;
+import org.geowebcache.layer.TileLayer;
 import org.geowebcache.layer.meta.LayerMetaInformation;
 import org.geowebcache.locks.MemoryLockProvider;
 import org.geowebcache.mime.MimeType;
 import org.geowebcache.storage.StorageBroker;
 import org.geowebcache.storage.TileObject;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -615,5 +623,63 @@ public class GeoServerTileLayerTest {
         layerGroupInfoTileLayer = new GeoServerTileLayer(layerGroup, defaults, gridSetBroker);
         assertNull(layerGroupInfoTileLayer.getLayerInfo());
         assertNotNull(layerGroupInfoTileLayer.getLayerGroupInfo());
+    }
+
+    @Test
+    public void testAdvertisingName() throws NoSuchFieldException, IllegalAccessException {
+        // workspace namespace
+        NamespaceInfo nameSpaceA = new NamespaceInfoImpl();
+        nameSpaceA.setPrefix("workspace-a");
+        nameSpaceA.setURI("http://goserver.org/test");
+        // create the workspace
+        WorkspaceInfo workspaceA = new WorkspaceInfoImpl();
+        workspaceA.setName("workspace-a");
+        // register the workspace in catalog
+        when(catalog.getWorkspaceByName("workspace-a")).thenReturn(workspaceA);
+        // layer resource
+        FeatureTypeInfoImpl resourceA = new FeatureTypeInfoImpl(null);
+        resourceA.setNamespace(nameSpaceA);
+        // create the layer
+        LayerInfoImpl layerA = new LayerInfoImpl();
+        layerA.setResource(resourceA);
+        layerA.setName("layer-a");
+        layerA.setId("layer-a");
+        // register the layer in catalog
+        when(catalog.getLayer("layer-a")).thenReturn(layerA);
+
+        // creating a layer group without workspace
+        LayerGroupInfoImpl layerGroupA = new LayerGroupInfoImpl();
+        layerGroupA.setName("random-prefix:layer-group-a");
+        layerGroupA.setId("layer-group-a");
+        layerGroupA.setLayers(Collections.singletonList(layerA));
+        // register the layer group in catalog
+        when(catalog.getLayerGroup("layer-group-a")).thenReturn(layerGroupA);
+
+        // creating the tiled layers
+        GeoServerTileLayer tileLayerA = new GeoServerTileLayer(layerA, defaults, gridSetBroker);
+        GeoServerTileLayer tileLayerB = new GeoServerTileLayer(layerGroupA, defaults, gridSetBroker);
+        // setting the catalog in both tile layers using reflection
+        Field catalogField = GeoServerTileLayer.class.getDeclaredField("catalog");
+        catalogField.setAccessible(true);
+        catalogField.set(tileLayerA, catalog);
+        catalogField.set(tileLayerB, catalog);
+
+        // check that with get the correct names and advertising names in a normal service
+        Assert.assertThat(tileLayerA.getName(), is("workspace-a:layer-a"));
+        Assert.assertThat(tileLayerA.getAdvertisingName(), is("workspace-a:layer-a"));
+        Assert.assertThat(tileLayerB.getName(), is("random-prefix:layer-group-a"));
+        Assert.assertThat(tileLayerB.getAdvertisingName(), is("random-prefix:layer-group-a"));
+
+        try {
+            // now in the context of a virtual service
+            LocalWorkspace.set(workspaceA);
+            Assert.assertThat(tileLayerA.getName(), is("workspace-a:layer-a"));
+            Assert.assertThat(tileLayerA.getAdvertisingName(), is("layer-a"));
+            Assert.assertThat(tileLayerB.getName(), is("random-prefix:layer-group-a"));
+            Assert.assertThat(tileLayerB.getAdvertisingName(), is("random-prefix:layer-group-a"));
+        } finally {
+            // cleaning
+            LocalWorkspace.set(null);
+        }
     }
 }
