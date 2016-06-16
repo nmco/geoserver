@@ -42,4 +42,14 @@ public class WMTSExtendedCapabilitiesTest extends ViewServicesTestSupport {
     protected ServiceInfo getServiceInfo() {
         return getGeoServer().getService(WMTSInfo.class);
     }
+
+    @Override
+    protected String getInspireNameSpace() {
+        return WMTSExtendedCapabilitiesProvider.VS_VS_OWS_NAMESPACE;
+    }
+
+    @Override
+    protected String getInspireSchema() {
+        return WMTSExtendedCapabilitiesProvider.VS_VS_OWS_SCHEMA;
+    }
 }

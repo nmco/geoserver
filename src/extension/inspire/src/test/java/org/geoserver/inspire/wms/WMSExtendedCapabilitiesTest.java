@@ -18,6 +18,7 @@ import static org.geoserver.inspire.InspireMetadata.LANGUAGE;
 import static org.geoserver.inspire.InspireMetadata.SERVICE_METADATA_TYPE;
 import static org.geoserver.inspire.InspireMetadata.SERVICE_METADATA_URL;
 import static org.geoserver.inspire.InspireSchema.VS_NAMESPACE;
+import static org.geoserver.inspire.InspireSchema.VS_SCHEMA;
 import static org.geoserver.inspire.InspireTestSupport.clearInspireMetadata;
 import static org.junit.Assert.assertEquals;
 
@@ -54,6 +55,16 @@ public class WMSExtendedCapabilitiesTest extends ViewServicesTestSupport {
     @Override
     protected ServiceInfo getServiceInfo() {
         return getGeoServer().getService(WMSInfo.class);
+    }
+
+    @Override
+    protected String getInspireNameSpace() {
+        return VS_NAMESPACE;
+    }
+
+    @Override
+    protected String getInspireSchema() {
+        return VS_SCHEMA;
     }
 
     // There is an INSPIRE DTD for WMS 1.1.1 but not implementing this

@@ -24,10 +24,11 @@ import static org.geoserver.inspire.InspireMetadata.LANGUAGE;
 import static org.geoserver.inspire.InspireMetadata.SERVICE_METADATA_TYPE;
 import static org.geoserver.inspire.InspireMetadata.SERVICE_METADATA_URL;
 import static org.geoserver.inspire.InspireSchema.COMMON_NAMESPACE;
-import static org.geoserver.inspire.InspireSchema.VS_NAMESPACE;
-import static org.geoserver.inspire.InspireSchema.VS_SCHEMA;
 
 public class WMTSExtendedCapabilitiesProvider implements WMTSExtension {
+
+    public final static String VS_VS_OWS_NAMESPACE = "http://inspire.ec.europa.eu/schemas/inspire_vs_ows11/1.0";
+    public final static String VS_VS_OWS_SCHEMA = "http://inspire.ec.europa.eu/schemas/inspire_vs_ows11/1.0/inspire_vs_ows_11.xsd";
 
     private final GeoServer geoserver;
 
@@ -37,12 +38,12 @@ public class WMTSExtendedCapabilitiesProvider implements WMTSExtension {
 
     @Override
     public String[] getSchemaLocations() {
-        return new String[]{VS_NAMESPACE, VS_SCHEMA};
+        return new String[]{VS_VS_OWS_NAMESPACE, VS_VS_OWS_SCHEMA};
     }
 
     @Override
     public void registerNamespaces(XMLBuilder xml) throws IOException {
-        xml.attribute("xmlns:inspire_vs", "http://inspire.ec.europa.eu/schemas/inspire_vs_ows11/1.0");
+        xml.attribute("xmlns:inspire_vs", VS_VS_OWS_NAMESPACE);
         xml.attribute("xmlns:inspire_common", COMMON_NAMESPACE);
     }
 
