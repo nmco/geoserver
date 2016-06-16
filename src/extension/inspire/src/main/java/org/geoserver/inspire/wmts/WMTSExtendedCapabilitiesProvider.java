@@ -8,11 +8,11 @@ package org.geoserver.inspire.wmts;
 import org.geoserver.ExtendedCapabilitiesProvider;
 import org.geoserver.catalog.MetadataMap;
 import org.geoserver.config.GeoServer;
+import org.geoserver.gwc.wmts.WMTSInfo;
 import org.geoserver.inspire.ViewServicesUtils;
-import org.geoserver.platform.GeoServerExtensions;
-import org.geoserver.wms.WMS;
-import org.geoserver.wms.WMSInfo;
-import org.geotools.util.Version;
+import org.geowebcache.config.meta.ServiceContact;
+import org.geowebcache.config.meta.ServiceInformation;
+import org.geowebcache.config.meta.ServiceProvider;
 import org.geowebcache.io.XMLBuilder;
 import org.geowebcache.service.wmts.WMTSExtension;
 import org.xml.sax.Attributes;
@@ -42,8 +42,8 @@ public class WMTSExtendedCapabilitiesProvider implements WMTSExtension {
 
     @Override
     public void registerNamespaces(XMLBuilder xml) throws IOException {
-        xml.attribute("inspire_vs", VS_NAMESPACE);
-        xml.attribute("inspire_common", COMMON_NAMESPACE);
+        xml.attribute("xmlns:inspire_vs", "http://inspire.ec.europa.eu/schemas/inspire_vs_ows11/1.0");
+        xml.attribute("xmlns:inspire_common", COMMON_NAMESPACE);
     }
 
     @Override
@@ -102,5 +102,23 @@ public class WMTSExtendedCapabilitiesProvider implements WMTSExtension {
         String mediaType = (String) serviceMetadata.get(SERVICE_METADATA_TYPE.key);
         String language = (String) serviceMetadata.get(LANGUAGE.key);
         ViewServicesUtils.addScenario1Elements(translator, metadataURL, mediaType, language);
+    }
+
+    @Override
+    public ServiceInformation getServiceInformation() {
+        WMTSInfo gsInfo = geoserver.getService(WMTSInfo.class);
+        ServiceInformation gwcInfo = new ServiceInformation();
+        gwcInfo.setTitle(gsInfo.getTitle());
+        gwcInfo.setTitle(gsInfo.getTitle());
+        gwcInfo.setDescription(gsInfo.getAbstract());
+        gwcInfo.getKeywords().addAll(gsInfo.keywordValues());
+        gwcInfo.setFees(gsInfo.getFees());
+        gwcInfo.setAccessConstraints(gsInfo.getAccessConstraints());
+        ServiceProvider serviceProvider = new ServiceProvider();
+        serviceProvider.setProviderName(gsInfo.getMaintainer());
+        serviceProvider.setProviderName(gsInfo.getOnlineResource());
+        serviceProvider.setServiceContact(new ServiceContact());
+        gwcInfo.setServiceProvider(serviceProvider);
+        return gwcInfo;
     }
 }

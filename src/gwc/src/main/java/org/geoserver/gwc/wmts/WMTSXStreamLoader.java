@@ -1,18 +1,14 @@
-package org.geoserver.inspire.wmts;
+package org.geoserver.gwc.wmts;
 
 import org.geoserver.config.GeoServer;
 import org.geoserver.config.util.XStreamPersister;
 import org.geoserver.config.util.XStreamServiceLoader;
 import org.geoserver.platform.GeoServerResourceLoader;
-import org.geotools.util.Version;
-
-import java.util.ArrayList;
 
 public class WMTSXStreamLoader extends XStreamServiceLoader<WMTSInfo> {
 
     public WMTSXStreamLoader(GeoServerResourceLoader resourceLoader) {
         super(resourceLoader, "wmts");
-
     }
 
     public Class<WMTSInfo> getServiceClass() {
@@ -20,10 +16,8 @@ public class WMTSXStreamLoader extends XStreamServiceLoader<WMTSInfo> {
     }
 
     protected WMTSInfo createServiceFromScratch(GeoServer gs) {
-
         WMTSInfoImpl wmts = new WMTSInfoImpl();
         wmts.setName("WMTS");
-
         return wmts;
     }
 
@@ -35,7 +29,14 @@ public class WMTSXStreamLoader extends XStreamServiceLoader<WMTSInfo> {
 
     @Override
     protected WMTSInfo initialize(WMTSInfo service) {
-		super.initialize(service);
+        super.initialize(service);
+        service.setEnabled(true);
+        service.setMaintainer("http://geoserver.org/comm");
+        service.setOnlineResource("http://geoserver.org");
+        service.setTitle("GeoServer Web Map Tile Service");
+        service.setAbstract("A compliant implementation of WMTS service.");
+        service.setFees("NONE");
+        service.setAccessConstraints("NONE");
         return service;
     }
 }

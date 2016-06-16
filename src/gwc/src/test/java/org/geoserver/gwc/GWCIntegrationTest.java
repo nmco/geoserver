@@ -975,26 +975,6 @@ public class GWCIntegrationTest extends GeoServerSystemTestSupport {
         assertThat(cacheResult, is("HIT"));
     }
 
-    @Test
-    public void testGetCapabilitiesFull() throws Exception {
-        // initiating the xpath engine
-        Map<String, String> namespaces = new HashMap<>();
-        namespaces.put("xlink", "http://www.w3.org/1999/xlink");
-        namespaces.put("xsi", "http://www.w3.org/2001/XMLSchema-instance");
-        namespaces.put("ows", "http://www.opengis.net/ows/1.1");
-        namespaces.put("wmts", "http://www.opengis.net/wmts/1.0");
-        XMLUnit.setXpathNamespaceContext(new SimpleNamespaceContext(namespaces));
-        XpathEngine xpath = XMLUnit.newXpathEngine();
-        // getting capabilities document for all available
-        Document document = getAsDOM("gwc/service/wmts?request=GetCapabilities");
-        // checking get capabilities result for CITE workspace
-        List<LayerInfo> citeLayers = getWorkspaceLayers(MockData.CITE_PREFIX);
-        assertThat(Integer.parseInt(xpath.evaluate("count(//wmts:Contents/wmts:Layer)", document)), greaterThan(0));
-        assertThat(Integer.parseInt(xpath.evaluate("count(//wmts:Contents/wmts:Layer)", document)), lessThanOrEqualTo(citeLayers.size()));
-        assertThat(xpath.evaluate("count(//wmts:Contents/wmts:Layer[ows:Identifier='" +
-                MockData.BUILDINGS.getLocalPart() + "'])", document), is("1"));
-    }
-
     /**
      * Helper method that will return the layers that belong to a certain workspace.
      */

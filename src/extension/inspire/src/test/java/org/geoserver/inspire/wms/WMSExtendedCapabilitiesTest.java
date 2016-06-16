@@ -51,6 +51,11 @@ public class WMSExtendedCapabilitiesTest extends ViewServicesTestSupport {
         return "application/vnd.ogc.csw.GetRecordByIdResponse_xml";
     }
 
+    @Override
+    protected ServiceInfo getServiceInfo() {
+        return getGeoServer().getService(WMSInfo.class);
+    }
+
     // There is an INSPIRE DTD for WMS 1.1.1 but not implementing this
     @Test
     public void testExtCaps111WithFullSettings() throws Exception {

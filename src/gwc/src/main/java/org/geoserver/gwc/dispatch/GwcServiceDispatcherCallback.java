@@ -10,12 +10,15 @@ import java.util.Map;
 
 import org.geoserver.catalog.Catalog;
 import org.geoserver.catalog.WorkspaceInfo;
+import org.geoserver.config.GeoServer;
 import org.geoserver.gwc.layer.CatalogConfiguration;
+import org.geoserver.gwc.wmts.WMTSInfo;
 import org.geoserver.ows.AbstractDispatcherCallback;
 import org.geoserver.ows.Dispatcher;
 import org.geoserver.ows.DispatcherCallback;
 import org.geoserver.ows.LocalWorkspace;
 import org.geoserver.ows.Request;
+import org.geoserver.platform.ServiceException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
@@ -37,16 +40,25 @@ public class GwcServiceDispatcherCallback extends AbstractDispatcherCallback imp
         DispatcherCallback {
 
     private final Catalog catalog;
+    private final GeoServer geoServer;
 
-    public GwcServiceDispatcherCallback(Catalog catalog) {
+    public GwcServiceDispatcherCallback(Catalog catalog, GeoServer geoServer) {
         this.catalog = catalog;
+        this.geoServer = geoServer;
     }
 
     @Override
     public Request init(Request request) {
         String context = request.getContext();
-        if (context == null || !context.contains("gwc/service")) {
+        if (context == null || !context.toLowerCase().contains("gwc/service")) {
             return null;
+        }
+
+        // checking if WMTS service is enabled in the current context
+        WMTSInfo wmtsInfo = geoServer.getService(WMTSInfo.class);
+        if (request.getHttpRequest().getRequestURI().toLowerCase().contains("service/wmts")
+                && wmtsInfo != null && !wmtsInfo.isEnabled()) {
+            throw new ServiceException( "Service " + wmtsInfo.getName() + " is disabled" );
         }
 
         Map<String, String> kvp = new HashMap<String, String>();

@@ -37,10 +37,12 @@ public abstract class ViewServicesTestSupport extends GeoServerSystemTestSupport
     protected abstract String getLanguage();
 
     protected abstract String getAlternateMetadataType();
+    
+    protected abstract ServiceInfo getServiceInfo();
 
     @Test
     public void testNoInspireSettings() throws Exception {
-        final ServiceInfo serviceInfo = getGeoServer().getService(WMSInfo.class);
+        final ServiceInfo serviceInfo = getServiceInfo();
         final MetadataMap metadata = serviceInfo.getMetadata();
         clearInspireMetadata(metadata);
         getGeoServer().save(serviceInfo);
@@ -51,7 +53,7 @@ public abstract class ViewServicesTestSupport extends GeoServerSystemTestSupport
 
     @Test
     public void testCreateExtCapsOff() throws Exception {
-        final ServiceInfo serviceInfo = getGeoServer().getService(WMSInfo.class);
+        final ServiceInfo serviceInfo = getServiceInfo();
         final MetadataMap metadata = serviceInfo.getMetadata();
         clearInspireMetadata(metadata);
         metadata.put(CREATE_EXTENDED_CAPABILITIES.key, false);
@@ -66,7 +68,7 @@ public abstract class ViewServicesTestSupport extends GeoServerSystemTestSupport
 
     @Test
     public void testExtCapsWithFullSettings() throws Exception {
-        final ServiceInfo serviceInfo = getGeoServer().getService(WMSInfo.class);
+        final ServiceInfo serviceInfo = getServiceInfo();
         final MetadataMap metadata = serviceInfo.getMetadata();
         clearInspireMetadata(metadata);
         metadata.put(CREATE_EXTENDED_CAPABILITIES.key, true);
@@ -85,7 +87,7 @@ public abstract class ViewServicesTestSupport extends GeoServerSystemTestSupport
 
     @Test
     public void testReloadSettings() throws Exception {
-        final ServiceInfo serviceInfo = getGeoServer().getService(WMSInfo.class);
+        final ServiceInfo serviceInfo = getServiceInfo();
         final MetadataMap metadata = serviceInfo.getMetadata();
         clearInspireMetadata(metadata);
         metadata.put(CREATE_EXTENDED_CAPABILITIES.key, true);
@@ -102,7 +104,7 @@ public abstract class ViewServicesTestSupport extends GeoServerSystemTestSupport
     // Test ExtendedCapabilities is not produced if required settings missing
     @Test
     public void testNoMetadataUrl() throws Exception {
-        final ServiceInfo serviceInfo = getGeoServer().getService(WMSInfo.class);
+        final ServiceInfo serviceInfo = getServiceInfo();
         final MetadataMap metadata = serviceInfo.getMetadata();
         clearInspireMetadata(metadata);
         metadata.put(CREATE_EXTENDED_CAPABILITIES.key, true);
@@ -117,7 +119,7 @@ public abstract class ViewServicesTestSupport extends GeoServerSystemTestSupport
     // Test ExtendedCapabilities response when optional settings missing
     @Test
     public void testNoMediaType() throws Exception {
-        final ServiceInfo serviceInfo = getGeoServer().getService(WMSInfo.class);
+        final ServiceInfo serviceInfo = getServiceInfo();
         final MetadataMap metadata = serviceInfo.getMetadata();
         clearInspireMetadata(metadata);
         metadata.put(CREATE_EXTENDED_CAPABILITIES.key, true);
@@ -136,7 +138,7 @@ public abstract class ViewServicesTestSupport extends GeoServerSystemTestSupport
     // if the other required settings exist and don't if they don't
     @Test
     public void testCreateExtCapMissingWithRequiredSettings() throws Exception {
-        final ServiceInfo serviceInfo = getGeoServer().getService(WMSInfo.class);
+        final ServiceInfo serviceInfo = getServiceInfo();
         final MetadataMap metadata = serviceInfo.getMetadata();
         clearInspireMetadata(metadata);
         metadata.put(SERVICE_METADATA_URL.key, getMetadataUrl());
@@ -150,7 +152,7 @@ public abstract class ViewServicesTestSupport extends GeoServerSystemTestSupport
 
     @Test
     public void testCreateExtCapMissingWithoutRequiredSettings() throws Exception {
-        final ServiceInfo serviceInfo = getGeoServer().getService(WMSInfo.class);
+        final ServiceInfo serviceInfo = getServiceInfo();
         final MetadataMap metadata = serviceInfo.getMetadata();
         clearInspireMetadata(metadata);
         metadata.put(SERVICE_METADATA_TYPE.key, getMetadataType());
@@ -163,7 +165,7 @@ public abstract class ViewServicesTestSupport extends GeoServerSystemTestSupport
 
     @Test
     public void testChangeMediaType() throws Exception {
-        final ServiceInfo serviceInfo = getGeoServer().getService(WMSInfo.class);
+        final ServiceInfo serviceInfo = getServiceInfo();
         final MetadataMap metadata = serviceInfo.getMetadata();
         clearInspireMetadata(metadata);
         metadata.put(CREATE_EXTENDED_CAPABILITIES.key, true);

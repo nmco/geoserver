@@ -5,17 +5,9 @@
  */
 package org.geoserver.inspire.wmts;
 
+import org.geoserver.config.ServiceInfo;
+import org.geoserver.gwc.wmts.WMTSInfo;
 import org.geoserver.inspire.ViewServicesTestSupport;
-import org.junit.Test;
-import org.springframework.mock.web.MockHttpServletResponse;
-import org.w3c.dom.Document;
-
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import java.io.StringWriter;
 
 public class WMTSExtendedCapabilitiesTest extends ViewServicesTestSupport {
 
@@ -46,16 +38,8 @@ public class WMTSExtendedCapabilitiesTest extends ViewServicesTestSupport {
         return "application/vnd.ogc.csw.GetRecordByIdResponse_xml";
     }
 
-    @Test
-    public void test() throws Exception {
-        MockHttpServletResponse sr = getAsServletResponse("gwc/service/wmts?REQUEST=GetCapabilities");
-        System.out.println("qaa");
-        final Document dom = getAsDOM(getGetCapabilitiesRequestPath());
-        TransformerFactory tf = TransformerFactory.newInstance();
-        Transformer transformer = tf.newTransformer();
-        transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-        StringWriter writer = new StringWriter();
-        transformer.transform(new DOMSource(dom), new StreamResult(writer));
-        System.out.println(writer.getBuffer().toString());
+    @Override
+    protected ServiceInfo getServiceInfo() {
+        return getGeoServer().getService(WMTSInfo.class);
     }
 }

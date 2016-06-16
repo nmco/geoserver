@@ -85,6 +85,7 @@
       adapts them to be resolved to the GWC proxy service
     </description>
     <constructor-arg ref="catalog" />
+    <constructor-arg ref="geoServer" />
   </bean>
 
   <bean id="GWCDispatcherProxyService" class="org.geoserver.gwc.dispatch.GwcServiceProxy">

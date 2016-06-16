@@ -3,7 +3,7 @@
  * This code is licensed under the GPL 2.0 license, available at the root
  * application directory.
  */
-package org.geoserver.inspire.wmts;
+package org.geoserver.gwc.wmts;
 
 import org.geoserver.config.impl.ServiceInfoImpl;
 

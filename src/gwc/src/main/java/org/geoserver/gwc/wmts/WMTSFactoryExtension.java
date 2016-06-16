@@ -3,9 +3,11 @@
  * This code is licensed under the GPL 2.0 license, available at the root
  * application directory.
  */
-package org.geoserver.inspire.wmts;
+package org.geoserver.gwc.wmts;
 
 import org.geoserver.config.ServiceFactoryExtension;
+import org.geoserver.gwc.wmts.WMTSInfo;
+import org.geoserver.gwc.wmts.WMTSInfoImpl;
 
 public class WMTSFactoryExtension extends ServiceFactoryExtension<WMTSInfo> {
 

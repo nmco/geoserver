@@ -3,13 +3,27 @@
  * This code is licensed under the GPL 2.0 license, available at the root
  * application directory.
  */
-package org.geoserver.inspire.wmts;
+package org.geoserver.gwc.wmts;
 
+import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.geoserver.web.services.BaseServiceAdminPage;
 
 public class WMTSAdminPage extends BaseServiceAdminPage<WMTSInfo> {
+
+    public WMTSAdminPage() {
+        this(new PageParameters());
+    }
+
+    public WMTSAdminPage(PageParameters pageParams) {
+        super(pageParams);
+    }
+
+    public WMTSAdminPage(WMTSInfo service) {
+        super(service);
+    }
 
     @Override
     protected Class<WMTSInfo> getServiceClass() {
@@ -23,5 +37,6 @@ public class WMTSAdminPage extends BaseServiceAdminPage<WMTSInfo> {
 
     @Override
     protected void build(IModel info, Form form) {
+        form.get("citeCompliant").setEnabled(false);
     }
 }
