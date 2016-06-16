@@ -15,6 +15,10 @@
   
   <bean id="inspireWcsExtendedCapsProvider" class="org.geoserver.inspire.wcs.WCSExtendedCapabilitiesProvider">
   </bean>
+
+  <bean id="inspireWmtsExtendedCapsProvider" class="org.geoserver.inspire.wmts.WMTSExtendedCapabilitiesProvider">
+    <constructor-arg ref="geoServer"/>
+  </bean>
   
   <bean id="inspireWmsAdminPanel" class="org.geoserver.web.services.AdminPagePanelInfo">
       <description>This bean adds the necessary form fields to Geoserver admin interface</description>
@@ -37,4 +41,27 @@
     <property name="componentClass" value="org.geoserver.inspire.web.InspireAdminPanel"/>
     <property name="serviceClass" value="org.geoserver.wcs.WCSInfo"/>
   </bean>
+
+  <bean id="wmtsServicePage" class="org.geoserver.web.services.ServiceMenuPageInfo">
+    <property name="id" value="wmts"/>
+    <property name="titleKey" value="wmts.title"/>
+    <property name="descriptionKey" value="wmts.description"/>
+    <property name="componentClass" value="org.geoserver.inspire.wmts.WMTSAdminPage"/>
+    <property name="icon" value="server_tile_map.png"/>
+    <property name="category" ref="servicesCategory"/>
+    <property name="serviceClass" value="org.geoserver.inspire.wmts.WMTSInfo"/>
+  </bean>
+
+  <bean id="inspireWmtsAdminPanel" class="org.geoserver.web.services.AdminPagePanelInfo">
+    <property name="id" value="inspireWmtsAdminPanel"/>
+    <property name="titleKey" value="inspire"/>
+    <property name="componentClass" value="org.geoserver.inspire.web.InspireAdminPanel"/>
+    <property name="serviceClass" value="org.geoserver.inspire.wmts.WMTSInfo"/>
+  </bean>
+
+  <bean id="wmtsLoader" class="org.geoserver.inspire.wmts.WMTSXStreamLoader">
+    <constructor-arg ref="resourceLoader"/>
+  </bean>
+
+  <bean id="wmtsFactoryExtension" class="org.geoserver.inspire.wmts.WMTSFactoryExtension"/>
 </beans>
