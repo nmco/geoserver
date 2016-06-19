@@ -912,4 +912,117 @@ public class GWCIntegrationTest extends GeoServerSystemTestSupport {
             }
         }
     }
+
+    /**
+     * Test that removing a layer from the catalog also removes its tile cache.
+     */
+    @Test
+    public void testRemoveCachedLayer() throws Exception {
+        // the prefixed name of the layer under test
+        String layerName = getLayerId(MockData.BASIC_POLYGONS);
+        assertEquals("cite:BasicPolygons", layerName);
+        // resource path to cache directory (FileBlobStore)
+        String cacheDirectory = "gwc/cite_BasicPolygons";
+        // resource path to cached tile (FileBlobStore)
+        String cachedTile = "gwc/cite_BasicPolygons/EPSG_4326_00/0_0/00_00.png";
+        GeoServerResourceLoader loader = getResourceLoader();
+        // cache directory and cached tile should not yet exist
+        assertNull("Unexpected cache directory " + cacheDirectory, loader.find(cacheDirectory));
+        assertNull("Unexpected cached tile " + cachedTile, loader.find(cachedTile));
+        // trigger tile caching with a WMTS request
+        MockHttpServletResponse response = getAsServletResponse("gwc/service/wmts" //
+                + "?request=GetTile" //
+                + "&layer=" + layerName //
+                + "&format=image/png" //
+                + "&tilematrixset=EPSG:4326" //
+                + "&tilematrix=EPSG:4326:0" //
+                + "&tilerow=0" //
+                + "&tilecol=0");
+        assertEquals(200, response.getStatus());
+        assertEquals("image/png", response.getContentType());
+        // cache directory and cached tile should now be present
+        assertNotNull("Missing cache directory " + cacheDirectory, loader.find(cacheDirectory));
+        assertNotNull("Missing cached tile " + cachedTile, loader.find(cachedTile));
+        // remove layer from the catalog, which should also remove cache directory and thus cached tile
+        getCatalog().remove(getCatalog().getLayerByName(layerName));
+        // cache directory and cached tile should now not exist
+        assertNull("Unexpected cache directory " + cacheDirectory, loader.find(cacheDirectory));
+        assertNull("Unexpected cached tile " + cachedTile, loader.find(cachedTile));
+    }
+
+    @Test
+    public void testGetCapabilitiesWithLocalWorkspace() throws Exception {
+        // initiating the xpath engine
+        Map<String, String> namespaces = new HashMap<>();
+        namespaces.put("xlink", "http://www.w3.org/1999/xlink");
+        namespaces.put("xsi", "http://www.w3.org/2001/XMLSchema-instance");
+        namespaces.put("ows", "http://www.opengis.net/ows/1.1");
+        namespaces.put("wmts", "http://www.opengis.net/wmts/1.0");
+        XMLUnit.setXpathNamespaceContext(new SimpleNamespaceContext(namespaces));
+        XpathEngine xpath = XMLUnit.newXpathEngine();
+        // getting capabilities document for CITE workspace
+        Document document = getAsDOM(MockData.CITE_PREFIX + "/gwc/service/wmts?request=GetCapabilities");
+        // checking get capabilities result for CITE workspace
+        List<LayerInfo> citeLayers = getWorkspaceLayers(MockData.CITE_PREFIX);
+        assertThat(Integer.parseInt(xpath.evaluate("count(//wmts:Contents/wmts:Layer)", document)), greaterThan(0));
+        assertThat(Integer.parseInt(xpath.evaluate("count(//wmts:Contents/wmts:Layer)", document)), lessThanOrEqualTo(citeLayers.size()));
+        assertThat(xpath.evaluate("count(//wmts:Contents/wmts:Layer[ows:Identifier='" +
+                MockData.BUILDINGS.getLocalPart() + "'])", document), is("1"));
+    }
+
+    @Test
+    public void testGetTileWithLocalWorkspace() throws Exception {
+        // perform a get tile request using a virtual service
+        MockHttpServletResponse response = getAsServletResponse(MockData.CITE_PREFIX + "/gwc/service/wmts?request=GetTile&layer="
+                + MockData.BASIC_POLYGONS.getLocalPart()
+                + "&format=image/png&tilematrixset=EPSG:4326&tilematrix=EPSG:4326:0&tilerow=0&tilecol=0");
+        assertEquals(200, response.getStatus());
+        assertEquals("image/png", response.getContentType());
+        // redo the same request
+        response = getAsServletResponse(MockData.CITE_PREFIX + "/gwc/service/wmts?request=GetTile&layer="
+                + MockData.BASIC_POLYGONS.getLocalPart()
+                + "&format=image/png&tilematrixset=EPSG:4326&tilematrix=EPSG:4326:0&tilerow=0&tilecol=0");
+        assertEquals(200, response.getStatus());
+        assertEquals("image/png", response.getContentType());
+        // check that we got an hit
+        String cacheResult = (String) response.getHeaderValue("geowebcache-cache-result");
+        assertThat(cacheResult, notNullValue());
+        assertThat(cacheResult, is("HIT"));
+    }
+
+    /**
+     * Helper method that will return the layers that belong to a certain workspace.
+     */
+    private List<LayerInfo> getWorkspaceLayers(String workspaceName) {
+        List<LayerInfo> layers = new ArrayList<>();
+        for (LayerInfo layer : getCatalog().getLayers()) {
+            WorkspaceInfo workspace = layer.getResource().getStore().getWorkspace();
+            if(workspace != null && workspace.getName().equals(workspaceName)) {
+                layers.add(layer);
+            }
+        }
+        return layers;
+    }
+
+    @Test
+    public void testWMTSEnabling() throws Exception {
+        // store original value to restore it
+        boolean initialValue = getGeoServer().getService(WMTSInfo.class).isEnabled();
+        try {
+            LocalWorkspace.set(null);
+            WMTSInfo wmtsInfo = getGeoServer().getService(WMTSInfo.class);
+            wmtsInfo.setEnabled(false);
+            getGeoServer().save(wmtsInfo);
+            MockHttpServletResponse response = getAsServletResponse("gwc/service/wmts?service=wmts&version=1.0.0&request=GetCapabilities");
+            assertEquals(400, response.getStatus());
+            wmtsInfo.setEnabled(true);
+            getGeoServer().save(wmtsInfo);
+            response = getAsServletResponse("gwc/service/wmts?service=wmts&version=1.0.0&request=GetCapabilities");
+            assertEquals(200, response.getStatus());
+        } finally {
+            // restoring initial configuration value
+            getGeoServer().getService(WMTSInfo.class).setEnabled(initialValue);
+            LocalWorkspace.set(null);
+        }
+    }
 }
