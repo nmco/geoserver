@@ -92,9 +92,9 @@ public class GWCInitializer implements GeoServerInitializer {
         LOGGER.info("Initializing GeoServer specific GWC configuration from "
                 + GWCConfigPersister.GWC_CONFIG_FILE);
 
-        final Version currentVersion = new Version("1.1.0");
-        final Resource configFile = configPersister.findConfigFile();
-        if (configFile == null || configFile.getType() != Type.RESOURCE) {
+        final Version currentVersion = new Version("1.0.0");
+        final File configFile = configPersister.findConfigFile();
+        if (configFile == null) {
             LOGGER.fine("GWC's GeoServer specific configuration not found, creating with old defaults");
             GWCConfig oldDefaults = GWCConfig.getOldDefaults();
             oldDefaults.setVersion(currentVersion.toString());
@@ -106,7 +106,7 @@ public class GWCInitializer implements GeoServerInitializer {
         final GWCConfig config = configPersister.getConfig();
         final Version version = new Version(config.getVersion());
 
-        if (version.compareTo(new Version("2.0.0")) < 0 && config.isWMTSEnabled() != null) {
+        if (version.compareTo(new Version("1.1.0")) < 0 && config.isWMTSEnabled() != null) {
             // setting WMTS enabling information based on old GWC configuration setting
             WMTSInfo globalServiceInfo = geoServer.getFacade().getService(WMTSInfo.class);
             globalServiceInfo.setEnabled(config.isWMTSEnabled());

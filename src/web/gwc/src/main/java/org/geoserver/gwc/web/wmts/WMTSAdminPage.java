@@ -6,7 +6,7 @@ package org.geoserver.gwc.web.wmts;
 
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.PageParameters;
 import org.geoserver.gwc.wmts.WMTSInfo;
 import org.geoserver.web.services.BaseServiceAdminPage;
 
