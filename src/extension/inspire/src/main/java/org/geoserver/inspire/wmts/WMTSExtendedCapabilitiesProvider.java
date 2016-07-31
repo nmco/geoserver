@@ -11,6 +11,7 @@ import org.geoserver.config.ContactInfo;
 import org.geoserver.config.GeoServer;
 import org.geoserver.gwc.wmts.WMTSInfo;
 import org.geoserver.inspire.ViewServicesUtils;
+import org.geowebcache.GeoWebCacheExtensionPriority;
 import org.geowebcache.config.meta.ServiceContact;
 import org.geowebcache.config.meta.ServiceInformation;
 import org.geowebcache.config.meta.ServiceProvider;
@@ -49,7 +50,7 @@ public class WMTSExtendedCapabilitiesProvider implements WMTSExtension {
     }
 
     @Override
-    public void encodedOperationsMetadata(XMLBuilder xml) throws IOException {
+    public void encodedOperationsMetadata(final XMLBuilder xml) throws IOException {
 
         // create custom translator
         ExtendedCapabilitiesProvider.Translator translator = new org.geoserver.ExtendedCapabilitiesProvider.Translator() {
@@ -139,5 +140,10 @@ public class WMTSExtendedCapabilitiesProvider implements WMTSExtension {
         }
         gwcInfo.setServiceProvider(serviceProvider);
         return gwcInfo;
+    }
+
+    @Override
+    public int getPriority() {
+        return GeoWebCacheExtensionPriority.LOWEST;
     }
 }

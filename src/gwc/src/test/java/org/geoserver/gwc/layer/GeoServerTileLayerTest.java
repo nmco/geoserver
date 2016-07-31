@@ -5,6 +5,7 @@
  */
 package org.geoserver.gwc.layer;
 
+import static java.util.Collections.singletonList;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
@@ -50,6 +51,7 @@ import org.geoserver.catalog.Catalog;
 import org.geoserver.catalog.Keyword;
 import org.geoserver.catalog.LayerInfo;
 import org.geoserver.catalog.LegendInfo;
+import org.geoserver.catalog.MetadataLinkInfo;
 import org.geoserver.catalog.NamespaceInfo;
 import org.geoserver.catalog.PublishedInfo;
 import org.geoserver.catalog.StyleInfo;
@@ -175,7 +177,7 @@ public class GeoServerTileLayerTest {
         metadataLinkInfo.setId("metadata-id");
         metadataLinkInfo.setMetadataType("metadata-type");
         metadataLinkInfo.setType("metadata-format");
-        resource.setMetadataLinks(Collections.singletonList(metadataLinkInfo));
+        resource.setMetadataLinks(singletonList((MetadataLinkInfo) metadataLinkInfo));
 
         layerInfo = new LayerInfoImpl();
         layerInfo.setId(layerInfoId);
@@ -199,7 +201,6 @@ public class GeoServerTileLayerTest {
         legendInfo.setHeight(200);
         legendInfo.setFormat("image/png");
         legendInfo.setOnlineResource("some-url                                                                                         ");
-        alternateStyle2.setLegend(legendInfo);
         layerInfo.setStyles(alternateStyles);
 
         layerGroup = new LayerGroupInfoImpl();
@@ -208,7 +209,7 @@ public class GeoServerTileLayerTest {
         layerGroup.setName("MockLayerGroup");
         layerGroup.setTitle("Group title");
         layerGroup.setAbstract("Group abstract");
-        layerGroup.setLayers(Collections.singletonList((PublishedInfo) layerInfo));
+        layerGroup.setLayers(singletonList((PublishedInfo) layerInfo));
 
         defaults = GWCConfig.getOldDefaults();
 
@@ -685,7 +686,7 @@ public class GeoServerTileLayerTest {
         LayerGroupInfoImpl layerGroupA = new LayerGroupInfoImpl();
         layerGroupA.setName("random-prefix:layer-group-a");
         layerGroupA.setId("layer-group-a");
-        layerGroupA.setLayers(Collections.singletonList(layerA));
+        layerGroupA.setLayers(singletonList((PublishedInfo) layerA));
         // register the layer group in catalog
         when(catalog.getLayerGroup("layer-group-a")).thenReturn(layerGroupA);
         // creating the tiled layers
@@ -787,10 +788,11 @@ public class GeoServerTileLayerTest {
                 "=WMS&request=GetLegendGraphic&format=image%2Fpng&width=20&height=20&layer=workspace%3AMockLayerInfoName&style=alternateStyle-1"));
         // alternateStyle-2
         assertThat(legendsInfo.get("alternateStyle-2"), notNullValue());
-        assertThat(legendsInfo.get("alternateStyle-2").width, is(150));
-        assertThat(legendsInfo.get("alternateStyle-2").height, is(200));
+        assertThat(legendsInfo.get("alternateStyle-2").width, is(120));
+        assertThat(legendsInfo.get("alternateStyle-2").height, is(150));
         assertThat(legendsInfo.get("alternateStyle-2").format, is("image/png"));
-        assertThat(legendsInfo.get("alternateStyle-2").legendUrl.trim(), is("http://localhost:8080/geoserver/some-url"));
+        assertThat(legendsInfo.get("alternateStyle-2").legendUrl.trim(), is("http://localhost:8080/geoserver/ows?service=WMS&request=GetLegendGraphic" +
+                "&format=image%2Fpng&width=20&height=20&layer=workspace%3AMockLayerInfoName&style=alternateStyle-2"));
     }
 
     private void setupUrlContext() {

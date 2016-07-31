@@ -54,7 +54,6 @@ import org.geoserver.wms.GetLegendGraphicRequest;
 import org.geoserver.wms.GetMapRequest;
 import org.geoserver.wms.WMS;
 import org.geoserver.wms.WebMap;
-import org.geoserver.wms.map.RenderedImageMap;
 import org.geoserver.wms.capabilities.LegendSample;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.CRS;
@@ -1288,11 +1287,12 @@ public class GeoServerTileLayer extends TileLayer implements ProxyLayer {
         if (layerInfo == null) {
             return null;
         }
+        layerInfo.getLegend();
         Map<String, LegendInfo> legends = new HashMap<>();
         Set<StyleInfo> styles = new HashSet<>(layerInfo.getStyles());
         styles.add(layerInfo.getDefaultStyle());
         for (StyleInfo styleInfo : styles) {
-            org.geoserver.catalog.LegendInfo legendInfo = styleInfo.getLegend();
+            org.geoserver.catalog.LegendInfo legendInfo = null;
             LegendInfo gwcLegendInfo = new LegendInfo();
             if (legendInfo != null) {
                 gwcLegendInfo.id = legendInfo.getId();
