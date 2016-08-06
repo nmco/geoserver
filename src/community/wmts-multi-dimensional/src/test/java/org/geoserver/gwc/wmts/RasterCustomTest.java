@@ -9,7 +9,6 @@ import org.geoserver.catalog.ResourceInfo;
 import org.geoserver.catalog.testreader.CustomFormat;
 import org.geoserver.gwc.wmts.dimensions.Dimension;
 import org.geoserver.gwc.wmts.dimensions.RasterCustomDimension;
-import org.geoserver.gwc.wmts.dimensions.RasterElevationDimension;
 import org.junit.Test;
 
 import static org.hamcrest.Matchers.instanceOf;

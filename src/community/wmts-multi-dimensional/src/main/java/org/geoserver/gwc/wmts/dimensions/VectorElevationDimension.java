@@ -11,12 +11,8 @@ import org.geoserver.catalog.ResourceInfo;
 import org.geoserver.gwc.wmts.FilteredFeatureType;
 import org.geoserver.gwc.wmts.Tuple;
 import org.geoserver.wms.WMS;
-import org.geoserver.wms.dimension.DimensionFilterBuilder;
-import org.geotools.gml2.bindings.GML2EncodingUtils;
 import org.opengis.filter.Filter;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.TreeSet;
 
@@ -59,5 +55,10 @@ public class VectorElevationDimension extends Dimension {
     @Override
     public Filter getFilter() {
         return buildVectorFilter();
+    }
+
+    @Override
+    public Tuple<List<String>, List<String>> getHistogram(Filter filter, String resolution) {
+        return getHistogramForNumericValues(filter, resolution);
     }
 }

@@ -21,7 +21,6 @@ import org.geoserver.wms.WMS;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.filter.visitor.SimplifyingFilterVisitor;
 import org.geotools.geometry.jts.ReferencedEnvelope;
-import org.geotools.util.Range;
 import org.geotools.util.logging.Logging;
 import org.geowebcache.GeoWebCacheException;
 import org.geowebcache.conveyor.Conveyor;
@@ -127,7 +126,7 @@ public final class MultiDimensionalExtension extends WMTSExtensionImpl {
         encodeLayerDimensions(xmlBuilder, dimensions);
     }
 
-    private Domains getDomains(SimpleConveyor conveyor) {
+    private Domains getDomains(SimpleConveyor conveyor) throws Exception {
         // getting and parsing the mandatory parameters
         String layerName = (String) conveyor.getParameter("layer", true);
         TileLayer tileLayer = tileLayerDispatcher.getTileLayer(layerName);
@@ -160,8 +159,7 @@ public final class MultiDimensionalExtension extends WMTSExtensionImpl {
         Domains domains = getDomains(conveyor);
         domains.setHistogram((String) conveyor.getParameter("histogram", true));
         domains.setResolution((String) conveyor.getParameter("resolution", true));
-        Range
-        DescribeDomainsTransformer transformer = new DescribeDomainsTransformer(wms);
+        HistogramTransformer transformer = new HistogramTransformer(wms);
         transformer.transform(domains, conveyor.getResponse().getOutputStream());
     }
 

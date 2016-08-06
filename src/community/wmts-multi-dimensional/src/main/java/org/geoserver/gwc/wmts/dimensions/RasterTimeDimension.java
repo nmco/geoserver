@@ -13,7 +13,6 @@ import org.geoserver.catalog.util.ReaderDimensionsAccessor;
 import org.geoserver.gwc.wmts.Tuple;
 import org.geoserver.wms.WMS;
 import org.geotools.coverage.grid.io.GridCoverage2DReader;
-import org.geotools.util.DateRange;
 import org.opengis.filter.Filter;
 
 import java.io.IOException;
@@ -56,5 +55,10 @@ public class RasterTimeDimension extends Dimension {
     @Override
     public Filter getFilter() {
         return buildRasterFilter();
+    }
+
+    @Override
+    public Tuple<List<String>, List<String>> getHistogram(Filter filter, String resolution) {
+        return getHistogramForDateValues(filter, resolution);
     }
 }

@@ -44,4 +44,17 @@ public class Domains {
     public void setResolution(String resolution) {
         this.resolution = resolution;
     }
+
+    public String getHistogramName() {
+        return histogram;
+    }
+
+    public Tuple<List<String>, List<String>> getHistogramValues() {
+        for (Dimension dimension : dimensions) {
+            if (dimension.getName().equalsIgnoreCase(histogram)) {
+                return dimension.getHistogram(filter, resolution);
+            }
+        }
+        throw new RuntimeException(String.format("Dimension '%s' could not be found.", histogram));
+    }
 }

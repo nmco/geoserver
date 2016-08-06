@@ -27,16 +27,22 @@ import org.geotools.gce.imagemosaic.properties.time.TimeParser;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.gml2.bindings.GML2EncodingUtils;
 import org.geotools.util.DateRange;
+import org.geotools.util.NumberRange;
+import org.geotools.util.Range;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 /**
  * This class represents a dimension providing an abstraction
@@ -72,7 +78,7 @@ public abstract class Dimension {
 
     public abstract List<String> getDomainValuesAsStrings(TreeSet<?> domainValues);
 
-    public abstract List<String> getHistogram(Filter filter, String resolution);
+    public abstract Tuple<List<String>, List<String>> getHistogram(Filter filter, String resolution);
 
     protected WMS getWms() {
         return wms;
@@ -208,24 +214,97 @@ public abstract class Dimension {
         return Tuple.tuple(0, new TreeSet());
     }
 
-    protected Tuple<List<String>, List<String>> getHistogramForTimeValues(Filter filter, String resolution) {
+    protected Tuple<List<String>, List<String>> getHistogramForNumericValues(Filter filter, String resolution) {
         Tuple<Integer, TreeSet<?>> domainValues = getDomainValues(filter);
-        DateRange minMax = DimensionsUtils.getMinMaxTimeInterval(domainValues.second);
-        ISO8601Formatter dateFormatter = new ISO8601Formatter();
-        String domainString = dateFormatter.format(minMax.getMinValue()) +
-                "/" + dateFormatter.format(minMax.getMaxValue()) + "/" + resolution;
-        TimeParser timeParser = new TimeParser();
-        List<Date> intervals = timeParser.parse(domainString);
-        List<DateRange> buckets = new ArrayList<>();
-        if (intervals.size() == 1) {
-            buckets.add(new DateRange(intervals.get(0), intervals.get(0)));
-        } else {
-            Date previous = intervals.get(0);
-            for (int i = 1; i < intervals.size(); i++) {
-                buckets.add(new DateRange(previous, intervals.get(i)));
-                previous = intervals.get(i);
+        Tuple<String, List<NumberRange<Double>>> buckets;
+        try {
+            buckets = getNumericBuckets(domainValues.second, resolution);
+        } catch (ParseException exception) {
+            throw new RuntimeException(String.format("Error getting time buckets for layer '%s' with resolution '%s'.",
+                    layerInfo.getName(), resolution));
+        }
+        int[] histogramValues = new int[buckets.second.size()];
+        Arrays.fill(histogramValues, 0);
+        for (Object value : domainValues.second) {
+            int index = getBucketIndex(buckets.second, (Date) value);
+            if (index >= 0) {
+                histogramValues[index]++;
+
             }
         }
-        int[] histogram = new int[buckets.size()];
+        return Tuple.tuple(Collections.singletonList(buckets.first),
+                buckets.second.stream().map(String::valueOf).collect(Collectors.toList()));
+    }
+
+    private Tuple<String, List<NumberRange<Double>>> getNumericBuckets(TreeSet<?> domainValues, String resolution) throws ParseException {
+        NumberRange<Double> minMax = DimensionsUtils.getMinMaxElevationInterval(domainValues);
+        ISO8601Formatter dateFormatter = new ISO8601Formatter();
+        String domainString = dateFormatter.format(minMax.getMinValue());
+        domainString += "/" + dateFormatter.format(minMax.getMaxValue()) + "/" + resolution;
+        if (domainValues.size() == 1) {
+            return Tuple.tuple(domainString, Collections.singletonList(NumberRange.create(minMax.getMinValue(), minMax.getMaximum())));
+        }
+        List<NumberRange<Double>> buckets = new ArrayList<>();
+        double step = Double.parseDouble(resolution);
+        for (double i = minMax.getMinimum(); i <= minMax.getMaximum(); i += step) {
+            double limit = i + step;
+            if (limit > minMax.getMaximum()) {
+                buckets.add(NumberRange.create(i, minMax.getMaximum()));
+                break;
+            }
+            buckets.add(NumberRange.create(i, limit));
+        }
+        return Tuple.tuple(domainString, buckets);
+    }
+
+    protected Tuple<List<String>, List<String>> getHistogramForDateValues(Filter filter, String resolution) {
+        Tuple<Integer, TreeSet<?>> domainValues = getDomainValues(filter);
+        Tuple<String, List<DateRange>> buckets;
+        try {
+            buckets = getDateBuckets(domainValues.second, resolution);
+        } catch (ParseException exception) {
+            throw new RuntimeException(String.format("Error getting time buckets for layer '%s' with resolution '%s'.",
+                    layerInfo.getName(), resolution));
+        }
+        int[] histogramValues = new int[buckets.second.size()];
+        Arrays.fill(histogramValues, 0);
+        for (Object value : domainValues.second) {
+            int index = getBucketIndex(buckets.second, (Date) value);
+            if (index >= 0) {
+                histogramValues[index]++;
+
+            }
+        }
+        return Tuple.tuple(Collections.singletonList(buckets.first),
+                buckets.second.stream().map(String::valueOf).collect(Collectors.toList()));
+    }
+
+    private Tuple<String, List<DateRange>> getDateBuckets(TreeSet<?> domainValues, String resolution) throws ParseException {
+        DateRange minMax = DimensionsUtils.getMinMaxTimeInterval(domainValues);
+        ISO8601Formatter dateFormatter = new ISO8601Formatter();
+        String domainString = dateFormatter.format(minMax.getMinValue());
+        domainString += "/" + dateFormatter.format(minMax.getMaxValue()) + "/" + resolution;
+        TimeParser timeParser = new TimeParser();
+        List<Date> intervals = timeParser.parse(domainString);
+        if (intervals.size() == 1) {
+            return Tuple.tuple(domainString, Collections.singletonList(new DateRange(intervals.get(0), intervals.get(0))));
+        }
+        List<DateRange> buckets = new ArrayList<>();
+        Date previous = intervals.get(0);
+        for (int i = 1; i < intervals.size(); i++) {
+            buckets.add(new DateRange(previous, intervals.get(i)));
+            previous = intervals.get(i);
+        }
+        return Tuple.tuple(domainString, buckets);
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T extends Comparable, U extends Range> int getBucketIndex(List<U> buckets, T value) {
+        for (int i = 0; i < buckets.size(); i++) {
+            if (buckets.get(i).contains(value)) {
+                return i;
+            }
+        }
+        return -1;
     }
 }

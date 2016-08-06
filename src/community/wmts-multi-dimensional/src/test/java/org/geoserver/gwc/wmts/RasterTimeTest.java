@@ -1,11 +1,9 @@
 package org.geoserver.gwc.wmts;
 
-import org.geoserver.catalog.CoverageInfo;
 import org.geoserver.catalog.DimensionDefaultValueSetting.Strategy;
 import org.geoserver.catalog.DimensionInfo;
 import org.geoserver.catalog.DimensionPresentation;
 import org.geoserver.catalog.LayerInfo;
-import org.geoserver.catalog.ResourceInfo;
 import org.geoserver.gwc.wmts.dimensions.Dimension;
 import org.geoserver.gwc.wmts.dimensions.RasterTimeDimension;
 import org.geoserver.util.ISO8601Formatter;
@@ -15,9 +13,6 @@ import org.junit.Test;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
-
-import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertThat;
 
 public class RasterTimeTest extends TestsSupport {
 

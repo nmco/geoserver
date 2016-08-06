@@ -57,4 +57,9 @@ public class VectorTimeDimension extends Dimension {
     public Filter getFilter() {
         return buildVectorFilter();
     }
+
+    @Override
+    public Tuple<List<String>, List<String>> getHistogram(Filter filter, String resolution) {
+        return getHistogramForDateValues(filter, resolution);
+    }
 }

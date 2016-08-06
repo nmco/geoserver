@@ -1,23 +1,17 @@
 package org.geoserver.gwc.wmts;
 
 import org.geoserver.catalog.Catalog;
-import org.geoserver.catalog.CoverageInfo;
 import org.geoserver.catalog.DimensionDefaultValueSetting;
 import org.geoserver.catalog.DimensionInfo;
 import org.geoserver.catalog.DimensionPresentation;
-import org.geoserver.catalog.LayerInfo;
-import org.geoserver.catalog.ResourceInfo;
 import org.geoserver.catalog.impl.DimensionInfoImpl;
-import org.geoserver.catalog.testreader.CustomFormat;
 import org.geoserver.data.test.MockData;
 import org.geoserver.data.test.SystemTestData;
 import org.geoserver.gwc.wmts.dimensions.Dimension;
-import org.geoserver.gwc.wmts.dimensions.RasterElevationDimension;
 import org.geoserver.wms.WMS;
 import org.geoserver.wms.WMSTestSupport;
 import org.geoserver.wms.dimension.RasterTimeDimensionDefaultValueTest;
 import org.junit.Before;
-import org.junit.Test;
 import org.opengis.filter.Filter;
 
 import javax.xml.namespace.QName;
@@ -28,7 +22,6 @@ import java.util.TimeZone;
 import java.util.TreeSet;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 

@@ -56,4 +56,9 @@ public class RasterElevationDimension extends Dimension {
     public Filter getFilter() {
         return buildRasterFilter();
     }
+
+    @Override
+    public Tuple<List<String>, List<String>> getHistogram(Filter filter, String resolution) {
+        return getHistogramForNumericValues(filter, resolution);
+    }
 }

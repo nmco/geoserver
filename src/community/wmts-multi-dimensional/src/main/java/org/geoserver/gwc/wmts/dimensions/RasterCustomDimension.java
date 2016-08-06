@@ -59,4 +59,9 @@ public class RasterCustomDimension extends Dimension {
     public Filter getFilter() {
         return buildRasterFilter();
     }
+
+    @Override
+    public Tuple<List<String>, List<String>> getHistogram(Filter filter, String resolution) {
+        throw new RuntimeException("Histogram cannot be computed for custom dimensions.");
+    }
 }

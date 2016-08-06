@@ -1,17 +1,12 @@
 package org.geoserver.gwc.wmts;
 
-import org.geoserver.catalog.CoverageInfo;
 import org.geoserver.catalog.DimensionDefaultValueSetting.Strategy;
 import org.geoserver.catalog.DimensionInfo;
 import org.geoserver.catalog.DimensionPresentation;
 import org.geoserver.catalog.LayerInfo;
-import org.geoserver.catalog.ResourceInfo;
 import org.geoserver.gwc.wmts.dimensions.Dimension;
 import org.geoserver.gwc.wmts.dimensions.RasterElevationDimension;
 import org.junit.Test;
-
-import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertThat;
 
 public class RasterElevationTest extends TestsSupport {
 
