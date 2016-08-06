@@ -154,6 +154,9 @@ public class GeoServerTileLayer extends TileLayer implements ProxyLayer {
         this.publishedInfo = publishedInfo;
         this.info = state;
         TileLayerInfoUtil.checkAutomaticStyles(publishedInfo, state);
+
+        this.legendSample = GeoServerExtensions.bean(LegendSample.class);
+        this.wms = GeoServerExtensions.bean(WMS.class);
     }
 
     public GeoServerTileLayer(final Catalog catalog, final String publishedId,
@@ -167,6 +170,9 @@ public class GeoServerTileLayer extends TileLayer implements ProxyLayer {
         this.catalog = catalog;
         this.publishedId = publishedId;
         this.info = TileLayerInfoUtil.loadOrCreate(getPublishedInfo(), configDefaults);
+
+        this.legendSample = GeoServerExtensions.bean(LegendSample.class);
+        this.wms = GeoServerExtensions.bean(WMS.class);
     }
 
     public GeoServerTileLayer(final Catalog catalog, final String publishedId,
@@ -180,6 +186,9 @@ public class GeoServerTileLayer extends TileLayer implements ProxyLayer {
         this.catalog = catalog;
         this.publishedId = publishedId;
         this.info = state;
+
+        this.legendSample = GeoServerExtensions.bean(LegendSample.class);
+        this.wms = GeoServerExtensions.bean(WMS.class);
     }
 
     @Override

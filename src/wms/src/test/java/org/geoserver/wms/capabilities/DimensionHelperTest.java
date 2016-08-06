@@ -63,7 +63,7 @@ public class DimensionHelperTest {
         DimensionInfo dimensionInfo=new DimensionInfoImpl();
         dimensionInfo.setPresentation(DimensionPresentation.LIST);
         dimensionInfo.setResolution(new BigDecimal(1));
-        String customDimRepr=dimensionHelper.getCustomDomainRepresentation(dimensionInfo, values);
+        String customDimRepr=dimensionHelper.getCustomDomainRepresentation(null, dimensionInfo, values);
         //value with spaces,value
         Assert.equals(customDimRepr, vals[0]+","+vals[1]+","+vals[2].trim());
         //System.out.print(vals.toString());
