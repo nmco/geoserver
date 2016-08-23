@@ -1,0 +1,58 @@
+package org.geoserver.gwc.wmts;
+
+import org.geoserver.catalog.CoverageInfo;
+import org.geoserver.catalog.DimensionDefaultValueSetting.Strategy;
+import org.geoserver.catalog.DimensionInfo;
+import org.geoserver.catalog.DimensionPresentation;
+import org.geoserver.catalog.LayerInfo;
+import org.geoserver.catalog.ResourceInfo;
+import org.geoserver.catalog.testreader.CustomFormat;
+import org.geoserver.gwc.wmts.dimensions.Dimension;
+import org.geoserver.gwc.wmts.dimensions.RasterCustomDimension;
+import org.junit.Test;
+
+import static org.hamcrest.Matchers.instanceOf;
+import static org.junit.Assert.assertThat;
+
+/**
+ * This class contains tests that check that custom dimensions values are correctly extracted from rasters.
+ * Custom dimensions are only supported in rasters.
+ */
+public class RasterCustomTest extends TestsSupport {
+
+    @Test
+    public void testGetDefaultValue() {
+        testDefaultValueStrategy(Strategy.MINIMUM, "CustomDimValueA");
+        testDefaultValueStrategy(Strategy.MAXIMUM, "CustomDimValueC");
+    }
+
+    @Test
+    public void testGetDomainsValues() throws Exception {
+        testDomainsValuesRepresentation(DimensionPresentation.LIST, "CustomDimValueA", "CustomDimValueB", "CustomDimValueC");
+    }
+
+    @Override
+    protected Dimension buildDimension(DimensionInfo dimensionInfo) {
+        CoverageInfo rasterInfo = getCoverageInfo();
+        Dimension dimension = new RasterCustomDimension(wms, getLayerInfo(), CustomFormat.CUSTOM_DIMENSION_NAME, dimensionInfo);
+        rasterInfo.getMetadata().put(ResourceInfo.CUSTOM_DIMENSION_PREFIX+CustomFormat.CUSTOM_DIMENSION_NAME, dimensionInfo);
+        getCatalog().save(rasterInfo);
+        return dimension;
+    }
+
+    /**
+     * Helper method that just returns the current layer info.
+     */
+    private LayerInfo getLayerInfo() {
+        return catalog.getLayerByName(RASTER_CUSTOM.getLocalPart());
+    }
+
+    /**
+     * Helper method that just returns the current coverage info.
+     */
+    private CoverageInfo getCoverageInfo() {
+        LayerInfo layerInfo = getLayerInfo();
+        assertThat(layerInfo.getResource(), instanceOf(CoverageInfo.class));
+        return (CoverageInfo) layerInfo.getResource();
+    }
+}
