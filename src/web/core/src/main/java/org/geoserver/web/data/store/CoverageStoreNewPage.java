@@ -50,19 +50,19 @@ public class CoverageStoreNewPage extends AbstractCoverageStorePage {
          * Try saving a copy of it so if the process fails somehow the original "info" does not end
          * up with an id set
          */
+        CoverageStoreInfo expandedStore = getCatalog().getResourcePool().clone(info, true);
         CoverageStoreInfo savedStore = catalog.getFactory().createCoverageStore();
-
+        
         // GR: this shouldn't fail, the Catalog.save(StoreInfo) API does not declare any action in
         // case
         // of a failure!... strange, why a save can't fail?
         // Still, be cautious and wrap it in a try/catch block so the page does not blow up
         try {
             // GeoServer Env substitution; validate first
-            clone(info, savedStore);
-            catalog.validate(savedStore, false).throwIfInvalid();
+            catalog.validate(expandedStore, false).throwIfInvalid();
             
-            // GeoServer Env substitution; fore to *AVOID* resolving env placeholders...
-            clone(info, savedStore, false);
+            // GeoServer Env substitution; force to *AVOID* resolving env placeholders...
+            savedStore = catalog.getResourcePool().clone(info, false);
             // ... and save
             catalog.save(savedStore);
         } catch (RuntimeException e) {
@@ -79,16 +79,15 @@ public class CoverageStoreNewPage extends AbstractCoverageStorePage {
         // the StoreInfo save succeeded... try to present the list of coverages (well, _the_
         // coverage while the getotools coverage api does not allow for more than one
         NewLayerPage layerChooserPage;
-        CoverageStoreInfo expandedStore = getCatalog().getFactory().createCoverageStore();
+        CoverageStoreInfo expandedStore;
         try {
-            clone(savedStore, expandedStore);
+            expandedStore = catalog.getResourcePool().clone(savedStore, true);
             // The ID is assigned by the catalog and therefore cannot be cloned
             layerChooserPage = new NewLayerPage(savedStore.getId());
         } catch (RuntimeException e) {
             LOGGER.log(Level.INFO, "Getting list of coverages for saved store " + info.getURL(), e);
             // doh, can't present the list of coverages, means saving the StoreInfo is meaningless.
             try {// be extra cautious
-                catalog.remove(expandedStore);
                 catalog.remove(savedStore);
             } catch (RuntimeErrorException shouldNotHappen) {
                 LOGGER.log(Level.WARNING, "Can't remove CoverageStoreInfo after adding it!", e);

@@ -9,7 +9,7 @@
   <parent>
     <groupId>org.geoserver</groupId>
     <artifactId>geoserver</artifactId>
-    <version>2.10-SNAPSHOT</version>
+    <version>2.11-SNAPSHOT</version>
   </parent>
 
   <groupId>org.geoserver</groupId>
@@ -30,7 +30,7 @@
     <dependency>
       <groupId>org.geoserver</groupId>
       <artifactId>gs-gwc</artifactId>
-      <version>2.10-SNAPSHOT</version>
+      <version>2.11-SNAPSHOT</version>
     </dependency>
   </dependencies>
 
@@ -80,8 +80,11 @@
           <descriptor>release/ext-ncwms.xml</descriptor>
           <descriptor>release/ext-gwc-sqlite.xml</descriptor> 
           <descriptor>release/ext-geogig.xml</descriptor>
-		      <descriptor>release/ext-backup-restore.xml</descriptor>
+          <descriptor>release/ext-oauth2-google.xml</descriptor>
+          <descriptor>release/ext-oauth2-geonode.xml</descriptor>
+          <descriptor>release/ext-backup-restore.xml</descriptor>
           <descriptor>release/ext-wmts-multi-dimensional.xml</descriptor> 
+          <descriptor>release/ext-onelogin.xml</descriptor> 
         </descriptors>
       </configuration>
      </plugin>
@@ -172,6 +175,12 @@
       </modules>
     </profile>
     <profile>
+      <id>onelogin</id>
+      <modules>
+        <module>onelogin</module>
+      </modules>
+    </profile>
+    <profile>
       <id>communityRelease</id>
       <modules>
         <module>authkey</module>
@@ -203,16 +212,20 @@
         <module>wps-jdbc</module>
         <module>release</module>
         <module>geogig</module>
-		<module>gwc-distributed</module>
-		<module>jdbcstore</module>
-		<module>gdal</module>
-		<module>gwc-s3</module>
-		<module>ysld</module>
+        <module>gwc-distributed</module>
+        <module>jdbcstore</module>
+        <module>gdal</module>
+        <module>gwc-s3</module>
+        <module>ysld</module>
         <module>backup-restore</module>
-		<module>ncwms</module>
+        <module>ncwms</module>
         <module>web-resource</module>
         <module>gwc-sqlite</module>
+        <module>security/oauth2</module>
+        <module>security/oauth2-google</module>
+        <module>security/oauth2-geonode</module>
         <module>wmts-multi-dimensional</module>
+        <module>onelogin</module>
       </modules>
     </profile>
     <profile>
@@ -467,6 +480,18 @@
       <id>geogig</id>
       <modules>
         <module>geogig</module>
+      </modules>
+    </profile>
+    <profile>
+      <id>oauth2-google</id>
+      <modules>
+        <module>security/oauth2-google</module>
+      </modules>
+    </profile>
+    <profile>
+      <id>oauth2-geonode</id>
+      <modules>
+        <module>security/oauth2-geonode</module>
       </modules>
     </profile>
     <profile>
