@@ -1,0 +1,40 @@
+{
+  "id": "1",
+  "geometry": {
+    "coordinates": [
+      50.0,
+      60.0
+    ],
+    "type": "Point"
+  },
+  "name": "station 1",
+  "contact": {
+    "mail": "stations@mail.com"
+  },
+  "measurements": [
+    {
+      "name": "temp",
+      "unit": "c",
+      "values": [
+        {
+          "time": 15235464,
+          "value": 35.0
+        },
+        {
+          "time": 15235464,
+          "value": 35.0
+        }
+      ]
+    },
+    {
+      "name": "wind",
+      "unit": "km/h",
+      "values": [
+        {
+          "time": 185541132,
+          "value": 155.0
+        }
+      ]
+    }
+  ]
+}

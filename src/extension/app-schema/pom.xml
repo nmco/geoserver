@@ -38,6 +38,12 @@
         </dependency>
 	    </dependencies>
    </profile>
+    <profile>
+      <id>app-schema-mongo-test</id>
+      <modules>
+        <module>app-schema-mongo-test</module>
+      </modules>
+    </profile>
  </profiles>
 	 
  <properties> 
