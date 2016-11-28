@@ -28,6 +28,7 @@ import org.geoserver.wfs.WFSInfo;
 import org.geoserver.wfs.request.FeatureCollectionResponse;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
+import org.geotools.feature.simple.SimpleFeatureTypeImpl;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.gml2.SrsSyntax;
 import org.geotools.referencing.CRS;
@@ -87,6 +88,17 @@ public class GeoJSONGetFeatureResponse extends WFSGetFeatureOutputFormat {
         } else {
             return JSONType.JSON.getMimeType();
         }
+    }
+
+    public static boolean isComplexFeature(FeatureCollectionResponse results) {
+        boolean hasComplex = false;
+        for (int fcIndex = 0; fcIndex < results.getFeature().size(); fcIndex++) {
+            if (!(results.getFeature().get(fcIndex).getSchema() instanceof SimpleFeatureTypeImpl)) {
+                hasComplex = true;
+                break;
+            }
+        }
+        return hasComplex;
     }
 
     @Override
