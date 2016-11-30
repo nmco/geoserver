@@ -56,46 +56,52 @@ public class ComplexGeoJsonWriter {
         jsonWriter.object();
         jsonWriter.key("type").value("Feature");
         jsonWriter.key("id").value(feature.getIdentifier().getID());
-        encodeGeometry(feature);
+        Property geometryAttribute = encodeGeometry(feature);
         jsonWriter.key("properties");
         jsonWriter.object();
-        encodeProperties(feature.getType(), feature.getProperties());
+        encodeProperties(geometryAttribute, feature.getType(), feature.getProperties());
         jsonWriter.endObject(); // end the properties
         jsonWriter.endObject(); // end the feature
     }
 
-    private void encodeGeometry(Feature feature) {
+    private Property encodeGeometry(Feature feature) {
         GeometryDescriptor geometryType = feature.getType().getGeometryDescriptor();
-        GeometryAttribute geometryAttribute = feature.getDefaultGeometryProperty();
+        Property geometryAttribute = null;
+        Geometry geometry = null;
         if(geometryType != null) {
             CoordinateReferenceSystem crs = geometryType.getCoordinateReferenceSystem();
             jsonWriter.setAxisOrder(CRS.getAxisOrder(crs));
             if (crs != null) {
                 this.crs = crs;
             }
+            geometryAttribute = feature.getProperty(geometryType.getName());
+            geometry = (Geometry) geometryAttribute.getValue();
         } else  {
             jsonWriter.setAxisOrder(CRS.AxisOrder.EAST_NORTH);
         }
         jsonWriter.key("geometry");
-        Geometry geometry = (Geometry) geometryAttribute.getValue();
         if (geometry != null) {
             jsonWriter.writeGeom(geometry);
             geometryFound = true;
         } else {
             jsonWriter.value(null);
         }
+        return geometryAttribute;
     }
 
-    private void encodeProperties(PropertyType parentType, Collection<Property> properties) {
-        Map<PropertyType, List<Property>> index = indexPropertiesByType(properties);
+    private void encodeProperties(Property geometryAttribute, PropertyType parentType, Collection<Property> properties) {
+        Map<PropertyType, List<Property>> index = indexPropertiesByType(geometryAttribute, properties);
         for (Map.Entry<PropertyType, List<Property>> entry : index.entrySet()) {
             encodePropertiesByType(parentType, entry.getKey(), entry.getValue());
         }
     }
 
-    private Map<PropertyType, List<Property>> indexPropertiesByType(Collection<Property> properties) {
+    private Map<PropertyType, List<Property>> indexPropertiesByType(Property geometryAttribute, Collection<Property> properties) {
         Map<PropertyType, List<Property>> index = new HashMap<>();
         for (Property property : properties) {
+            if (geometryAttribute != null && property.equals(geometryAttribute)) {
+                continue;
+            }
             List<Property> propertiesWithSameType = index.get(property.getType());
             if (propertiesWithSameType == null) {
                 propertiesWithSameType = new ArrayList<>();
@@ -125,7 +131,7 @@ public class ComplexGeoJsonWriter {
                 jsonWriter.array();
                 for (Feature feature : chainedFeatures) {
                     jsonWriter.object();
-                    encodeProperties(feature.getType(), feature.getProperties());
+                    encodeProperties(null, feature.getType(), feature.getProperties());
                     jsonWriter.endObject();
                 }
                 jsonWriter.endArray();
@@ -204,7 +210,7 @@ public class ComplexGeoJsonWriter {
         String name = attribute.getName().getLocalPart();
         jsonWriter.key(name);
         jsonWriter.object();
-        encodeProperties(attribute.getType(), attribute.getProperties());
+        encodeProperties(null, attribute.getType(), attribute.getProperties());
         jsonWriter.endObject();
     }
 
