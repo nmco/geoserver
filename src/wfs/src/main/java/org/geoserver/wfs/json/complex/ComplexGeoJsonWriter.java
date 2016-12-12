@@ -18,6 +18,7 @@ import org.opengis.feature.type.ComplexType;
 import org.opengis.feature.type.GeometryDescriptor;
 import org.opengis.feature.type.PropertyDescriptor;
 import org.opengis.feature.type.PropertyType;
+import org.opengis.filter.identity.Identifier;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import java.util.ArrayList;
@@ -55,7 +56,10 @@ public class ComplexGeoJsonWriter {
     private void encodeFeature(Feature feature) {
         jsonWriter.object();
         jsonWriter.key("type").value("Feature");
-        jsonWriter.key("id").value(feature.getIdentifier().getID());
+        Identifier identifier = feature.getIdentifier();
+        if (identifier != null) {
+            jsonWriter.key("id").value(identifier.getID());
+        }
         Property geometryAttribute = encodeGeometry(feature);
         jsonWriter.key("properties");
         jsonWriter.object();
