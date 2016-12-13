@@ -119,8 +119,10 @@ public class ComplexGeoJsonWriter {
     private void encodePropertiesByType(PropertyType parentType, PropertyType type, List<Property> properties) {
         PropertyDescriptor multipleType = isMultipleType(parentType, type);
         if (multipleType == null) {
-            // simple json object
-            encodeProperty(properties.get(0));
+            // simple json objects
+            for (Property property : properties) {
+                encodeProperty(property);
+            }
         } else {
             // possible chained features
             List<Feature> chainedFeatures = getChainedFeatures(properties);
