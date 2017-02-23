@@ -1,3 +1,7 @@
+/* (c) 2017 Open Source Geospatial Foundation - all rights reserved
+ * This code is licensed under the GPL 2.0 license, available at the root
+ * application directory.
+ */
 package org.geoserver.gwc.config;
 
 import java.io.File;
@@ -12,7 +16,6 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.geoserver.platform.resource.Files;
 import org.geoserver.platform.resource.Resource;
 import org.geoserver.platform.resource.ResourceStore;
 import org.geoserver.platform.resource.Resources;
@@ -23,8 +26,10 @@ import org.geowebcache.config.ConfigurationResourceProvider;
 
 public class GeoserverXMLResourceProvider implements ConfigurationResourceProvider {
 
-    private static Log log = LogFactory.getLog(org.geowebcache.config.XMLFileResourceProvider.class);
-    
+    private static Log LOGGER = LogFactory.getLog(org.geowebcache.config.XMLFileResourceProvider.class);
+
+    public static final String GEOWEBCACHE_CACHE_DIR_PROPERTY = "GEOWEBCACHE_CACHE_DIR";
+
     public static final String DEFAULT_CONFIGURATION_DIR_NAME = "gwc";
     
     /**
@@ -39,33 +44,56 @@ public class GeoserverXMLResourceProvider implements ConfigurationResourceProvid
     
     private String templateLocation;
 
-    public GeoserverXMLResourceProvider(final String configFileDirectory,
-            final String configFileName,
-            final ResourceStore resourceStore) throws ConfigurationException {
-        
+    public GeoserverXMLResourceProvider(String providedConfigDirectory, String configFileName,
+                                        ResourceStore resourceStore) throws ConfigurationException {
         this.configFileName = configFileName;
-        
-        if(configFileDirectory != null) {
-            // Use the given path
-            if ((new File(configFileDirectory)).isAbsolute()) {
-                
-                log.info("Provided configuration directory as absolute path '" + configFileDirectory + "'");
-                this.configDirectory = Files.asResource(new File(configFileDirectory));
-            } else {
-                log.info("Provided configuration directory in the resource store. ");
-                this.configDirectory = resourceStore.get(configFileDirectory);
-            }
-        } else {
-            this.configDirectory = resourceStore.get(DEFAULT_CONFIGURATION_DIR_NAME);
-        }
-        log.info("Will look for geowebcache.xml in '" + configDirectory + "'");
+        this.configDirectory = inferConfigDirectory(resourceStore, providedConfigDirectory);
+        LOGGER.info(String.format(
+                "Will look for geowebcache.xml in directory '%s'.",
+                configDirectory.dir().getAbsolutePath()));
     }
     
     public GeoserverXMLResourceProvider(final String configFileName,
             final ResourceStore resourceStore) throws ConfigurationException {
         this(null, configFileName, resourceStore);        
     }
-   
+
+    /**
+     * Helper method that infers the directory that will contain or contains GWC configuration. First we will
+     * check if a specific location was set using property GEOWEBCACHE_CACHE_DIR, then we will check if a
+     * location was provided and then fallback on the default location.
+     */
+    private static Resource inferConfigDirectory(ResourceStore resourceStore, String providedConfigDirectory) {
+        // first let's see if a specific location was defined using GEOWEBCACHE_CACHE_DIR property
+        String configDirectoryPath = System.getProperty(GEOWEBCACHE_CACHE_DIR_PROPERTY);
+        // if no specific location was defined using GEOWEBCACHE_CACHE_DIR property use the provided one
+        if (configDirectoryPath == null) {
+            configDirectoryPath = providedConfigDirectory;
+        } else {
+            // log that GEOWEBCACHE_CACHE_DIR property was used to set the configuration directory
+            LOGGER.info(String.format(
+                    "Property GEOWEBCACHE_CACHE_DIR is set with value '%s.'", configDirectoryPath));
+        }
+        // well if the configuration directory stills null we use the default location
+        if (configDirectoryPath == null) {
+            configDirectoryPath = DEFAULT_CONFIGURATION_DIR_NAME;
+        }
+        // instantiate a resource for the configuration directory
+        File configurationDirectory = new File(configDirectoryPath);
+        if (configurationDirectory.isAbsolute()) {
+            return Resources.fromPath(configurationDirectory.getAbsolutePath());
+        }
+        // configuration directory path is relative to geoserver data directory
+        return resourceStore.get(configDirectoryPath);
+    }
+
+    public Resource getConfigDirectory() {
+        return configDirectory;
+    }
+
+    public String getConfigFileName() {
+        return configFileName;
+    }
 
     @Override
     public InputStream in() throws IOException {
@@ -104,9 +132,9 @@ public class GeoserverXMLResourceProvider implements ConfigurationResourceProvid
         Resource xmlFile = findConfigFile();
 
         if (Resources.exists(xmlFile)) {
-            log.info("Found configuration file in " + configDirectory.path());
+            LOGGER.info("Found configuration file in " + configDirectory.path());
         } else if (templateLocation != null) {
-            log.warn("Found no configuration file in config directory, will create one at '"
+            LOGGER.warn("Found no configuration file in config directory, will create one at '"
                     + xmlFile.path() + "' from template "
                     + getClass().getResource(templateLocation).toExternalForm());
             // grab template from classpath
@@ -121,14 +149,14 @@ public class GeoserverXMLResourceProvider implements ConfigurationResourceProvid
 
         return xmlFile;
     }
-    
+
 
     private void backUpConfig(final Resource xmlFile) throws IOException {
         String timeStamp = new SimpleDateFormat("yyyy-MM-dd'T'HHmmss").format(new Date());
         String backUpFileName = "geowebcache_" + timeStamp + ".bak";
         Resource parentFile = xmlFile.parent();
 
-        log.debug("Backing up config file " + xmlFile.name() + " to " + backUpFileName);
+        LOGGER.debug("Backing up config file " + xmlFile.name() + " to " + backUpFileName);
 
         List<Resource> previousBackUps = Resources.list(parentFile, new Filter<Resource>() {
             public boolean accept(Resource res) {
@@ -153,14 +181,14 @@ public class GeoserverXMLResourceProvider implements ConfigurationResourceProvid
                 
             });
             Resource oldest = previousBackUps.get(0);
-            log.debug("Deleting oldest config backup " + oldest + " to keep a maximum of "
+            LOGGER.debug("Deleting oldest config backup " + oldest + " to keep a maximum of "
                     + maxBackups + " backups.");
             oldest.delete();
         }
 
         Resource backUpFile = parentFile.get(backUpFileName);
         IOUtils.copy(xmlFile.in(), backUpFile.out());
-        log.debug("Config backup done");
+        LOGGER.debug("Config backup done");
     }
 
     @Override
@@ -176,6 +204,4 @@ public class GeoserverXMLResourceProvider implements ConfigurationResourceProvid
     public boolean hasOutput() {
         return true;
     }
-
-
 }
