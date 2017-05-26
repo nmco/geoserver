@@ -6,6 +6,7 @@
 package org.geoserver.catalog;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.geotools.geometry.jts.ReferencedEnvelope;
@@ -196,6 +197,26 @@ public interface LayerGroupInfo extends PublishedInfo {
      * @see MetadataLinkInfo
      */
     List<MetadataLinkInfo> getMetadataLinks();
+
+    /**
+     * Return the keywords associated with this layer group. If no keywords are available
+     * an empty list should be returned.
+     *
+     * @return a non NULL list containing the keywords associated with this layer group
+     */
+    default List<KeywordInfo> getKeywords() {
+        return Collections.emptyList();
+    }
+
+    /**
+     * Set the keywords of this layer group. The provided keywords will override any existing
+     * keywords no merge will be done.
+     *
+     * @param keywords new keywords of this layer group
+     */
+    default void setKeywords(List<KeywordInfo> keywords) {
+        // nothing to do
+    }
 
     /**
      * A way to compare two LayerGroupInfo instances that works around all the wrappers we have

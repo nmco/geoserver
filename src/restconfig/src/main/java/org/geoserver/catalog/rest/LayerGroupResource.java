@@ -5,11 +5,14 @@
  */
 package org.geoserver.catalog.rest;
 
+import com.thoughtworks.xstream.XStream;
 import org.geoserver.catalog.Catalog;
 import org.geoserver.catalog.CatalogBuilder;
 import org.geoserver.catalog.CatalogInfo;
 import org.geoserver.catalog.CoverageInfo;
 import org.geoserver.catalog.DataStoreInfo;
+import org.geoserver.catalog.Keyword;
+import org.geoserver.catalog.KeywordInfo;
 import org.geoserver.catalog.LayerGroupInfo;
 import org.geoserver.catalog.LayerInfo;
 import org.geoserver.catalog.StyleInfo;
@@ -133,6 +136,11 @@ public class LayerGroupResource extends AbstractCatalogResource {
     
     @Override
     protected void configurePersister(XStreamPersister persister, DataFormat format) {
+        // add keyword object configuration
+        XStream xstream = persister.getXStream();
+        xstream.alias( "keyword", KeywordInfo.class);
+        xstream.addDefaultImplementation(Keyword.class, KeywordInfo.class);
+        // encode catalog references
         persister.setCallback( new XStreamPersister.Callback() {
             @Override
             protected Class<LayerGroupInfo> getObjectClass() {

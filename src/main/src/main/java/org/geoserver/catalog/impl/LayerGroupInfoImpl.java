@@ -6,11 +6,13 @@
 package org.geoserver.catalog.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.geoserver.catalog.AttributionInfo;
 import org.geoserver.catalog.AuthorityURLInfo;
 import org.geoserver.catalog.CatalogVisitor;
+import org.geoserver.catalog.KeywordInfo;
 import org.geoserver.catalog.LayerGroupHelper;
 import org.geoserver.catalog.LayerGroupInfo;
 import org.geoserver.catalog.LayerIdentifierInfo;
@@ -75,9 +77,22 @@ public class LayerGroupInfoImpl implements LayerGroupInfo {
      * @since 2.1.3
      */
     protected List<LayerIdentifierInfo> identifiers = new ArrayList<LayerIdentifierInfo>(2);
-    
-        
-    
+
+    private List<KeywordInfo> keywords = new ArrayList<>();
+
+    @Override
+    public List<KeywordInfo> getKeywords() {
+        return keywords;
+    }
+
+    @Override
+    public void setKeywords(List<KeywordInfo> keywords) {
+        if (keywords == null) {
+            this.keywords = new ArrayList<>();
+        }
+        this.keywords = keywords;
+    }
+
     public LayerGroupInfoImpl() {
         mode = Mode.SINGLE;
         publishables = new ArrayList<PublishedInfo>();        

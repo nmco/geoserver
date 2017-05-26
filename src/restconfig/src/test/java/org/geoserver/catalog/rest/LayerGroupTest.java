@@ -8,6 +8,9 @@ package org.geoserver.catalog.rest;
 
 import static org.custommonkey.xmlunit.XMLAssert.assertXpathEvaluatesTo;
 import static org.custommonkey.xmlunit.XMLAssert.assertXpathExists;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -18,6 +21,7 @@ import net.sf.json.JSON;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.geoserver.catalog.Catalog;
+import org.geoserver.catalog.Keyword;
 import org.geoserver.catalog.LayerGroupInfo;
 import org.geoserver.catalog.PublishedInfo;
 import org.geoserver.catalog.StyleInfo;
@@ -29,6 +33,7 @@ import org.w3c.dom.Document;
 
 import org.springframework.mock.web.MockHttpServletResponse;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class LayerGroupTest extends CatalogRESTTestSupport {
@@ -72,6 +77,9 @@ public class LayerGroupTest extends CatalogRESTTestSupport {
 
         lg2.setBounds( new ReferencedEnvelope( -180,-90,180,90, CRS.decode( "EPSG:4326") ) );
         catalog.add( lg2 );
+
+        // add some keywords to the CITE layer group
+        addKeywordsToLayerGroup("citeLayerGroup");
     }
 
     @Test
@@ -127,6 +135,11 @@ public class LayerGroupTest extends CatalogRESTTestSupport {
         assertXpathEvaluatesTo("citeLayerGroup", "/layerGroup/name", dom );
         assertXpathEvaluatesTo( "6", "count(//published)", dom );
         assertXpathEvaluatesTo( "6", "count(//style)", dom );
+
+        // check keywords were encoded
+        assertXpathEvaluatesTo( "2", "count(//layerGroup/keywords/keyword)", dom );
+        assertXpathEvaluatesTo( "1", "count(//layerGroup/keywords[keyword='keyword1\\@language=en\\;\\@vocabulary=vocabulary1\\;'])", dom );
+        assertXpathEvaluatesTo( "1", "count(//layerGroup/keywords[keyword='keyword2\\@language=pt\\;\\@vocabulary=vocabulary2\\;'])", dom );
     }
 
     @Test
@@ -158,6 +171,20 @@ public class LayerGroupTest extends CatalogRESTTestSupport {
         assertEquals(6, arr.size());
         arr = ((JSONObject)json).getJSONObject("layerGroup").getJSONObject("styles").getJSONArray("style");
         assertEquals(6, arr.size());
+
+        // check keywords were correctly encoded
+        JSONObject layerGroup = ((JSONObject) json).getJSONObject("layerGroup");
+        assertThat(layerGroup.containsKey("keywords"), is(true));
+        JSONObject keywordsObject = layerGroup.getJSONObject("keywords");
+        assertThat(keywordsObject.containsKey("keyword"), is(true));
+        JSONArray keywords = keywordsObject.getJSONArray("keyword");
+        assertThat(keywords.size(), is(2));
+        // created a list of keywords so we can check is content with hamcrest
+        List<Object> keywordsList = new ArrayList<>();
+        keywordsList.addAll(keywords);
+        assertThat(keywordsList, containsInAnyOrder(
+                "keyword1\\@language=en\\;\\@vocabulary=vocabulary1\\;",
+                "keyword2\\@language=pt\\;\\@vocabulary=vocabulary2\\;"));
     }
 
 
@@ -228,18 +255,21 @@ public class LayerGroupTest extends CatalogRESTTestSupport {
 
     @Test
     public void testPost() throws Exception {
-        String xml = 
-            "<layerGroup>" + 
-                "<name>newLayerGroup</name>" +
-                "<layers>" +
-                  "<layer>Ponds</layer>" +
-                  "<layer>Forests</layer>" +
-                "</layers>" +
-                "<styles>" +
-                  "<style>polygon</style>" +
-                  "<style>point</style>" +
-                "</styles>" +
-              "</layerGroup>";
+        String xml = "<layerGroup>" +
+                "    <name>newLayerGroup</name>" +
+                "    <layers>" +
+                "        <layer>Ponds</layer>" +
+                "        <layer>Forests</layer>" +
+                "    </layers>" +
+                "    <styles>" +
+                "        <style>polygon</style>" +
+                "        <style>point</style>" +
+                "    </styles>" +
+                "    <keywords>" +
+                "        <keyword>keyword1\\@language=en\\;\\@vocabulary=vocabulary1\\;</keyword>" +
+                "        <keyword>keyword2\\@language=pt\\;\\@vocabulary=vocabulary2\\;</keyword>" +
+                "    </keywords>" +
+                "</layerGroup>";
         
         MockHttpServletResponse response = postAsServletResponse("/rest/layergroups", xml );
         assertEquals( 201, response.getStatus() );
@@ -259,6 +289,17 @@ public class LayerGroupTest extends CatalogRESTTestSupport {
         assertEquals( "point", lg.getStyles().get( 1 ).getName() );
         
         assertNotNull( lg.getBounds() );
+
+        // expected keywords
+        Keyword keyword1 = new Keyword("keyword1");
+        keyword1.setLanguage("en");
+        keyword1.setVocabulary("vocabulary1");
+        Keyword keyword2 = new Keyword("keyword2");
+        keyword2.setLanguage("pt");
+        keyword2.setVocabulary("vocabulary2");
+        // check that the keywords were correctly added
+        assertThat(lg.getKeywords().size(), is(2));
+        assertThat(lg.getKeywords(), containsInAnyOrder(keyword1, keyword2));
     }
 
     @Test
