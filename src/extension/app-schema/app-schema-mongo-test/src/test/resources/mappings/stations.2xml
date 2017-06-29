@@ -71,7 +71,7 @@
           <targetAttribute>st:measurement</targetAttribute>
           <sourceExpression>
             <OCQL>collectionLink('measurements')</OCQL>
-            <linkElement>aaa</linkElement>
+            <linkElement>st:Measurement</linkElement>
             <linkField>FEATURE_LINK[1]</linkField>
           </sourceExpression>
           <isMultiple>true</isMultiple>
@@ -87,7 +87,6 @@
     <FeatureTypeMapping>
       <sourceDataStore>data_source</sourceDataStore>
       <sourceType>{collectionName}</sourceType>
-      <mappingName>aaa</mappingName>
       <targetElement>st:Measurement</targetElement>
       <attributeMappings>
         <AttributeMapping>
