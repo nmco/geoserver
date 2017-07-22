@@ -34,6 +34,7 @@ import org.geoserver.ows.Dispatcher;
 import org.geoserver.ows.Request;
 import org.geoserver.ows.URLMangler.URLType;
 import org.geoserver.ows.util.KvpMap;
+import org.geoserver.platform.GeoServerExtensions;
 import org.geoserver.wfs.request.FeatureCollectionResponse;
 import org.geoserver.wfs.request.GetFeatureRequest;
 import org.geoserver.wfs.request.Lock;
@@ -505,6 +506,21 @@ public class GetFeature {
                 org.geotools.data.Query gtQuery = toDataQuery(query, filter, offset,
                         queryMaxFeatures, source, request, allPropNames.get(0), viewParam,
                             joins, primaryTypeName, primaryAlias);
+
+                // extension point
+                GetFeatureContext context = new GetFeatureContextBuilder()
+                        .withFeatureSource(source)
+                        .withFeatureTypeInfo(meta)
+                        .withQuery(gtQuery)
+                        .withRequest(request).build();
+                List<GetFeatureCallback> callbacks = GeoServerExtensions.extensions(GetFeatureCallback.class);
+                for (GetFeatureCallback callback : callbacks) {
+                    context = callback.beforeQuerying(context);
+                }
+                source = context.getFeatureSource();
+                meta = context.getFeatureTypeInfo();
+                gtQuery = context.getQuery();
+                request = context.getRequest();
 
                 LOGGER.fine("Query is " + query + "\n To gt2: " + gtQuery);
 

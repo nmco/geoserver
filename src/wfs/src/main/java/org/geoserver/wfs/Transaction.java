@@ -313,11 +313,28 @@ public class Transaction {
         // Envelope envelope = new Envelope();
         Exception exception = null;
 
+        List<TransactionCallback> callbacks = GeoServerExtensions.extensions(TransactionCallback.class);
+
         try {
             for (Iterator it = elementHandlers.entrySet().iterator(); it.hasNext();) {
                 Map.Entry entry = (Map.Entry) it.next();
                 TransactionElement element = (TransactionElement) entry.getKey();
                 TransactionElementHandler handler = (TransactionElementHandler) entry.getValue();
+
+                TransactionContext context = new TransactionContextBuilder()
+                        .withElement(element)
+                        .withRequest(request)
+                        .withFeatureStores(stores)
+                        .withResponse(result)
+                        .withHandler(handler).build();
+                context = TransactionCallback.executeCallbacks(
+                        context, callbacks, TransactionCallback::beforeHandlerExecution);
+
+                element = context.getElement();
+                request = context.getRequest();
+                stores = context.getFeatureStores();
+                result = context.getResponse();
+                handler = context.getHandler();
 
                 handler.execute(element, request, stores, result, multiplexer);
             }

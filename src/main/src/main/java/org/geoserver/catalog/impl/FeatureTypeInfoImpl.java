@@ -5,10 +5,6 @@
  */
 package org.geoserver.catalog.impl;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.geoserver.catalog.AttributeTypeInfo;
 import org.geoserver.catalog.Catalog;
 import org.geoserver.catalog.CatalogVisitor;
@@ -20,10 +16,17 @@ import org.geotools.factory.Hints;
 import org.geotools.filter.text.cql2.CQLException;
 import org.geotools.filter.text.ecql.ECQL;
 import org.geotools.measure.Measure;
+import org.geotools.util.Converters;
 import org.opengis.feature.Feature;
 import org.opengis.feature.type.FeatureType;
 import org.opengis.filter.Filter;
 import org.opengis.util.ProgressListener;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @SuppressWarnings("serial")
 public class FeatureTypeInfoImpl extends ResourceInfoImpl implements
@@ -42,7 +45,9 @@ public class FeatureTypeInfoImpl extends ResourceInfoImpl implements
     boolean overridingServiceSRS;
     boolean skipNumberMatched = false;
     boolean circularArcPresent;
-    
+
+    protected Map<String, Object> parameters = new HashMap<>();
+
     public boolean isCircularArcPresent() {
     	return circularArcPresent;
 	}
@@ -236,5 +241,21 @@ public class FeatureTypeInfoImpl extends ResourceInfoImpl implements
         this.cqlFilter = cqlFilter;
         this.filter = null;
     }
-    
+
+    @Override
+    public <T> T getParameter(String parameterName, Class<T> expectType, T fallback) {
+        if (parameters == null || parameters.isEmpty()) {
+            return fallback;
+        }
+        Object value = parameters.get(parameterName);
+        return value == null ? fallback : Converters.convert(value, expectType);
+    }
+
+    @Override
+    public void putParameter(String parameterName, Object parameterValue) {
+        if (parameters == null) {
+            parameters = new HashMap<>();
+        }
+        parameters.put(parameterName, parameterValue);
+    }
 }
