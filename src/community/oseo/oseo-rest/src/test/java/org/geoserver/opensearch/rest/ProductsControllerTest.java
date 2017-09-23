@@ -188,6 +188,7 @@ public class ProductsControllerTest extends OSEORestTestSupport {
         assertEquals("NOMINAL", json.read("$.properties['eop:acquisitionType']"));
         assertEquals(Integer.valueOf(65), json.read("$.properties['eop:orbitNumber']"));
         assertEquals("2018-01-01T00:00:00.000+0000", json.read("$.properties['timeStart']"));
+        assertEquals("EPSG:32632", json.read("$.properties['crs']"));
         
         SimpleFeature sf = new FeatureJSON().readFeature(json.jsonString());
         ReferencedEnvelope bounds = ReferencedEnvelope.reference(sf.getBounds());
@@ -488,6 +489,24 @@ public class ProductsControllerTest extends OSEORestTestSupport {
 
         assertProductGranules();
     }
+    
+    @Test
+    public void testPutProductGranulesWithBands() throws Exception {
+        testCreateProduct();
+        
+        // add the granules
+        MockHttpServletResponse response = putAsServletResponse(
+                "/rest/oseo/collections/SENTINEL2/products/S2A_OPER_MSI_L1C_TL_SGS__20180101T000000_A006640_T32TPP_N02.04/granules",
+                getTestData("/product-granules-bands.json"), MediaType.APPLICATION_JSON_VALUE);
+        assertEquals(200, response.getStatus());
+
+        assertProductGranules();
+        DocumentContext json = getAsJSONPath(
+                "/rest/oseo/collections/SENTINEL2/products/S2A_OPER_MSI_L1C_TL_SGS__20180101T000000_A006640_T32TPP_N02.04/granules",
+                200);
+        assertEquals("B1", json.read("$.features[0].properties.band"));
+        assertEquals("B2", json.read("$.features[1].properties.band"));
+    }
 
     private void assertProductGranules() throws Exception {
         // grab and check
@@ -518,13 +537,15 @@ public class ProductsControllerTest extends OSEORestTestSupport {
                 "/rest/oseo/collections/SENTINEL2/products/S2A_OPER_MSI_L1C_TL_SGS__20160117T141030_A002979_T32TPM_N02.01/granules",
                 200);
         assertEquals("FeatureCollection", json.read("$.type"));
-        assertEquals(new Integer(1), json.read("$.features.length()"));
+        assertEquals(new Integer(4), json.read("$.features.length()"));
         assertEquals("Feature", json.read("$.features[0].type"));
         assertEquals("Polygon", json.read("$.features[0].geometry.type"));
         assertEquals(
                 "/efs/geoserver_data/coverages/sentinel/california/S2A_OPER_MSI_L1C_TL_SGS__20160117T141030_A002979_T32TPM_N02.01.tif",
                 json.read("$.features[0].properties.location"));
     }
+    
+    
 
     @Test
     public void testDeleteProductGranules() throws Exception {
@@ -555,7 +576,8 @@ public class ProductsControllerTest extends OSEORestTestSupport {
             if (parts.isEmpty()) {
                 continue;
             }
-
+            
+            LOGGER.info("Testing zip product creation with parts:" + parts);
             cleanupTestProduct();
             testCreateProductAsZip(parts);
         }
@@ -600,6 +622,7 @@ public class ProductsControllerTest extends OSEORestTestSupport {
                 ZipEntry entry = new ZipEntry(name);
                 zos.putNextEntry(entry);
                 IOUtils.copy(getClass().getResourceAsStream(resource), zos);
+                zos.flush();
                 zos.closeEntry();
             }
             zip = bos.toByteArray();

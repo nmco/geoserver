@@ -1,19 +1,70 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans
-                           http://www.springframework.org/schema/beans/spring-beans.xsd">
-  <bean id="versioning" class="org.geoserver.nsg.TimeVersioningCallback">
-    <constructor-arg ref="catalog"/>
-  </bean>
-  <bean id="versioningLayerConfig" class="org.geoserver.web.publish.LayerConfigurationPanelInfo">
-    <property name="id" value="wfsVersioningConfig"/>
-    <property name="titleKey" value="data.resource.config.wfs"/>
-    <property name="componentClass" value="org.geoserver.nsg.versioning.web.WfsVersioningConfig"/>
-    <property name="supportedTypes">
-      <list>
-        <value>org.geoserver.catalog.FeatureTypeInfo</value>
-      </list>
-    </property>
-  </bean>
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+	 http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd">
+	<bean id="versioning" class="org.geoserver.nsg.versioning.TimeVersioningCallback">
+		<constructor-arg ref="catalog" />
+	</bean>
+	<bean id="versioningLayerConfig" class="org.geoserver.web.publish.LayerConfigurationPanelInfo">
+		<property name="id" value="wfsVersioningConfig" />
+		<property name="titleKey" value="data.resource.config.wfs" />
+		<property name="componentClass"
+			value="org.geoserver.nsg.versioning.web.WfsVersioningConfig" />
+		<property name="supportedTypes">
+			<list>
+				<value>org.geoserver.catalog.FeatureTypeInfo</value>
+			</list>
+		</property>
+	</bean>
+	<bean id="indexConfiguration"
+		class="org.geoserver.nsg.pagination.random.IndexConfiguration">
+	</bean>
+	<!-- Index result dispatcher callback -->
+	<bean id="indexResultTypeDispatcherCallback"
+		class="org.geoserver.nsg.pagination.random.IndexResultTypeDispatcherCallback">
+		<description>
+			When a request using the index result type comes in a
+			dispatcher callback
+			this switch the "index" value by the "hits" value
+		</description>
+		<constructor-arg ref="geoServer" />
+		<constructor-arg ref="indexConfiguration" />
+	</bean>
+	<!-- Page result dispatcher callback -->
+	<bean id="pageResultsDispatcherCallback"
+		class="org.geoserver.nsg.pagination.random.PageResultsDispatcherCallback">
+		<description>
+			The PageResults operation will allow clients to query
+			random positions of an existing result set (stored GetFeature
+			request) that was previously created using the index result type
+		</description>
+		<constructor-arg ref="geoServer" />
+	</bean>
+	<!-- Page result service -->
+	<bean id="pageResultsTarget"
+		class="org.geoserver.nsg.pagination.random.PageResultsWebFeatureService">
+		<constructor-arg ref="geoServer" />
+		<constructor-arg ref="indexConfiguration" />
+	</bean>
+	<bean id="wfsServicePageResults" class="org.geoserver.platform.Service">
+		<constructor-arg index="0" value="wfs" />
+		<constructor-arg index="1" value="http://www.opengis.net/wfs/2.0" />
+		<constructor-arg index="2" ref="pageResultsTarget" />
+		<constructor-arg index="3" value="2.0.2" />
+		<constructor-arg index="4">
+			<list>
+				<value>PageResults</value>
+			</list>
+		</constructor-arg>
+	</bean>
+	<bean id="resultType202KvpParser" class="org.geoserver.nsg.pagination.random.ResultTypeKvpParser"/>
+	<!-- Clean scheduler -->
+	<bean id="indexInitializer" class="org.geoserver.nsg.pagination.random.IndexInitializer">
+	</bean>
+	<task:scheduler id="scheduler" />
+	<task:scheduled-tasks scheduler="scheduler">
+		<task:scheduled ref="indexInitializer" method="clean"
+			fixed-delay="1000" initial-delay="10000" />
+	</task:scheduled-tasks>
 </beans>
