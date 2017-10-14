@@ -193,4 +193,11 @@ public interface FeatureTypeInfo extends ResourceInfo {
 	
 	void setCircularArcPresent(boolean arcsPresent);
 
+    default <T> T getParameter(String parameterName, Class<T> expectType, T fallback) {
+        return null;
+    }
+
+    default void putParameter(String parameterName, Object parameterValue) {
+        // nothing to do
+    }
 }

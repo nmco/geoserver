@@ -329,4 +329,13 @@ public abstract class DecoratingFeatureTypeInfo extends AbstractDecorator<Featur
         delegate.setCqlFilter(cqlFilter);
     }
 
+    @Override
+    public <T> T getParameter(String parameterName, Class<T> expectType, T fallback) {
+        return delegate.getParameter(parameterName, expectType, fallback);
+    }
+
+    @Override
+    public void putParameter(String parameterName, Object parameterValue) {
+        delegate.putParameter(parameterName, parameterValue);
+    }
 }

@@ -5,21 +5,11 @@
  */
 package org.geoserver.wfs;
 
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Logger;
-
-import javax.xml.namespace.QName;
-
+import com.vividsolutions.jts.geom.Geometry;
 import org.geoserver.catalog.FeatureTypeInfo;
 import org.geoserver.config.GeoServer;
 import org.geoserver.feature.ReprojectingFeatureCollection;
+import org.geoserver.platform.GeoServerExtensions;
 import org.geoserver.wfs.request.Insert;
 import org.geoserver.wfs.request.TransactionElement;
 import org.geoserver.wfs.request.TransactionRequest;
@@ -40,7 +30,16 @@ import org.opengis.filter.FilterFactory;
 import org.opengis.filter.identity.FeatureId;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-import com.vividsolutions.jts.geom.Geometry;
+import javax.xml.namespace.QName;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
 
 
 /**
@@ -71,7 +70,21 @@ public class InsertElementHandler extends AbstractTransactionElementHandler {
     @SuppressWarnings("unchecked")
     public void execute(TransactionElement element, TransactionRequest request, Map featureStores, 
         TransactionResponse response, TransactionListener listener) throws WFSTransactionException {
-        
+
+        // invoke before insert callbacks
+        TransactionContext context = new TransactionContextBuilder()
+                .withElement(element)
+                .withRequest(request)
+                .withFeatureStores(featureStores)
+                .withResponse(response).build();
+        for (TransactionCallback callback : GeoServerExtensions.extensions(TransactionCallback.class)) {
+            context = callback.beforeInsertFeatures(context);
+        }
+        element = context.getElement();
+        request = context.getRequest();
+        featureStores = context.getFeatureStores();
+        response = context.getResponse();
+
         Insert insert = (Insert) element;
         LOGGER.finer("Transaction Insert:" + insert);
 

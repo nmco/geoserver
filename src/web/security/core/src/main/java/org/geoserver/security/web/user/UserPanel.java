@@ -105,7 +105,7 @@ public class UserPanel extends Panel {
         });
         
         //<NewUserPage><NewUserPage>("addNew", NewUserPage.class));
-        //add.setParameter(AbstractSecurityPage.ServiceNameKey, serviceName);
+        //add.putParameter(AbstractSecurityPage.ServiceNameKey, serviceName);
         add.setVisible(canCreateStore);
 
         // the removal button
