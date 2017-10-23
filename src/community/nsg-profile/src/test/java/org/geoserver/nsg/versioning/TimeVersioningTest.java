@@ -70,19 +70,16 @@ public final class TimeVersioningTest extends GeoServerSystemTestSupport {
         SimpleFeature foundFeature = foundFeatures.get(0);
         String description = (String) foundFeature.getAttribute("DESCRIPTION");
         assertThat(description, is("INSERT_1"));
-        WFS20_XPATH_ENGINE.evaluate();
     }
 
     @Test
     public void testGetFeatureVersioned() throws Exception {
         Document result = postAsDOM("wfs", TestsUtils.readResource("/requests/get_request_1.xml"));
-        System.out.println("aa");
     }
 
     @Test
     public void testUpdateVersionedFeature() throws Exception {
         Document result = postAsDOM("wfs", TestsUtils.readResource("/requests/update_request_1.xml"));
-        System.out.println("aa");
     }
 
     /**
