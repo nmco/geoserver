@@ -1078,6 +1078,17 @@ public class GWCIntegrationTest extends GeoServerSystemTestSupport {
         // check that GeoServer service metadata is available
         result = WMTS_XPATH_10.evaluate("count(//ows:ServiceProvider/ows:ProviderName[text()='http://geoserver.org'])", document);
         assertThat(Integer.parseInt(result), is(1));
+        // check that 0.0 and positive infinite scales are not advertised
+        result = WMTS_XPATH_10.evaluate("count(//wmts:Contents/wmts:Layer/wmts:Style/" +
+                "wmts:LegendURL[@minScaleDenominator='0.0'])", document);
+        assertThat(Integer.parseInt(result), is(0));
+        result = WMTS_XPATH_10.evaluate("count(//wmts:Contents/wmts:Layer/wmts:Style/" +
+                "wmts:LegendURL[@maxScaleDenominator='NaN'])", document);
+        assertThat(Integer.parseInt(result), is(0));
+        // check that min and max scales are advertised
+        result = WMTS_XPATH_10.evaluate("count(//wmts:Contents/wmts:Layer/wmts:Style/" +
+                "wmts:LegendURL[@minScaleDenominator='100000.0'][@maxScaleDenominator='300000.0'])", document);
+        assertThat(Integer.parseInt(result), greaterThan(0));
     }
     
     @Test
