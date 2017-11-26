@@ -28,6 +28,8 @@ import org.geowebcache.filter.parameters.ParameterFilter;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
+import org.geowebcache.service.OWSException;
+import org.vfny.geoserver.ServiceException;
 
 /**
  * ParameterFilter which allows the styles of the back end layer as legal values. Maintains a set 
@@ -97,7 +99,8 @@ public class StyleParameterFilter extends ParameterFilter {
                 }
             }
             // no match so fail
-            throw new ParameterException(str);
+            throw new ParameterException(400, "InvalidParameterValue",
+                    "Style", String.format("Style '%s' is invalid.", str));
         }
     }
     
