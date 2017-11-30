@@ -36,6 +36,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.logging.Level;
 
 import javax.imageio.ImageIO;
@@ -67,6 +68,7 @@ import javax.xml.validation.Validator;
 import org.apache.commons.codec.binary.Base64;
 import org.geoserver.catalog.CascadeDeleteVisitor;
 import org.geoserver.catalog.Catalog;
+import org.geoserver.catalog.DataStoreInfo;
 import org.geoserver.catalog.FeatureTypeInfo;
 import org.geoserver.catalog.Keyword;
 import org.geoserver.catalog.KeywordInfo;
@@ -78,6 +80,11 @@ import org.geoserver.catalog.StoreInfo;
 import org.geoserver.catalog.StyleInfo;
 import org.geoserver.catalog.TestHttpClientProvider;
 import org.geoserver.catalog.WorkspaceInfo;
+import org.geoserver.catalog.impl.DataStoreInfoImpl;
+import org.geoserver.catalog.impl.FeatureTypeInfoImpl;
+import org.geoserver.catalog.impl.LayerInfoImpl;
+import org.geoserver.catalog.impl.NamespaceInfoImpl;
+import org.geoserver.catalog.impl.WorkspaceInfoImpl;
 import org.geoserver.config.GeoServer;
 import org.geoserver.config.GeoServerDataDirectory;
 import org.geoserver.config.GeoServerLoaderProxy;
@@ -86,6 +93,7 @@ import org.geoserver.data.test.SystemTestData;
 import org.geoserver.logging.LoggingUtils;
 import org.geoserver.ows.util.CaseInsensitiveMap;
 import org.geoserver.ows.util.KvpUtils;
+import org.geoserver.ows.util.OwsUtils;
 import org.geoserver.ows.util.ResponseUtils;
 import org.geoserver.platform.ContextLoadedEvent;
 import org.geoserver.platform.GeoServerExtensions;
@@ -108,6 +116,7 @@ import org.geoserver.security.password.GeoServerPBEPasswordEncoder;
 import org.geoserver.security.password.GeoServerPlainTextPasswordEncoder;
 import org.geotools.data.DataUtilities;
 import org.geotools.data.simple.SimpleFeatureSource;
+import org.geotools.feature.NameImpl;
 import org.geotools.util.logging.Log4JLoggerFactory;
 import org.geotools.util.logging.Logging;
 import org.geotools.xml.XSD;
@@ -2214,5 +2223,57 @@ public class GeoServerSystemTestSupport extends GeoServerBaseTestSupport<SystemT
         }
         layerGroup.getKeywords().addAll(keywords);
         getCatalog().save(layerGroup);
+    }
+
+    /**
+     * Helper method that clones a vector layer and adds it to a certain workspace. The provided
+     * layer name should correspond to an existing layer otherwise an exception will be throw.
+     * The provided target workspace and namespace should also exist.
+     */
+    protected LayerInfo cloneVectorLayerIntoWorkspace(WorkspaceInfo targetWorkspace, NamespaceInfo targetNameSpace, String layerName) {
+        return cloneVectorLayerIntoWorkspace(targetWorkspace, targetNameSpace, layerName, layerName);
+    }
+
+    /**
+     * Helper method that clones a vector layer and adds it to a certain workspace updating the layer name
+     * with the provided one. The provided layer name should correspond to an existing layer otherwise an
+     * exception will be throw. The provided target workspace and namespace should also exist.
+     */
+    protected LayerInfo cloneVectorLayerIntoWorkspace(WorkspaceInfo targetWorkspace,
+                                                      NamespaceInfo targetNameSpace, String layerName, String targetLayerName) {
+        Catalog catalog = getCatalog();
+        // get the original object from the catalog
+        LayerInfo originalLayerInfo = catalog.getLayerByName(layerName);
+        if (originalLayerInfo == null) {
+            // layer don't exists
+            throw new RuntimeException(String.format(
+                    "Could not retrieve a layer for name '%s'.", layerName));
+        }
+        FeatureTypeInfo originalFeatureTypeInfo = (FeatureTypeInfo) originalLayerInfo.getResource();
+        DataStoreInfo originalStoreInfo = originalFeatureTypeInfo.getStore();
+        // copy the data store, changing is workspace, id and name
+        DataStoreInfoImpl copyDataStoreInfo = new DataStoreInfoImpl(catalog);
+        OwsUtils.copy(originalStoreInfo, copyDataStoreInfo, DataStoreInfo.class);
+        copyDataStoreInfo.setId(UUID.randomUUID().toString());
+        copyDataStoreInfo.setName(UUID.randomUUID().toString());
+        copyDataStoreInfo.setWorkspace(targetWorkspace);
+        // copy the feature type info, changing the data store and name space
+        FeatureTypeInfoImpl copyFeatureTypeInfo = new FeatureTypeInfoImpl(catalog);
+        OwsUtils.copy(originalFeatureTypeInfo, copyFeatureTypeInfo, FeatureTypeInfo.class);
+        copyFeatureTypeInfo.setNamespace(targetNameSpace);
+        copyFeatureTypeInfo.setStore(copyDataStoreInfo);
+        copyFeatureTypeInfo.setName(targetLayerName);
+        // copy the layer, changing the feature type
+        LayerInfoImpl copyLayerInfo = new LayerInfoImpl();
+        OwsUtils.copy(originalLayerInfo, copyLayerInfo, LayerInfo.class);
+        copyLayerInfo.setId(layerName);
+        copyLayerInfo.setName(targetLayerName);
+        copyLayerInfo.setResource(copyFeatureTypeInfo);
+        // add everything to the catalog
+        catalog.add(copyDataStoreInfo);
+        catalog.add(copyFeatureTypeInfo);
+        catalog.add(copyLayerInfo);
+        // retrieve the cloned layer by name
+        return catalog.getLayerByName(new NameImpl(targetNameSpace.getPrefix(), targetLayerName));
     }
 }

@@ -1174,7 +1174,7 @@ public class GetFeature {
     }
 
     FeatureTypeInfo featureTypeInfo(QName name, GetFeatureRequest request) throws WFSException, IOException {
-        FeatureTypeInfo meta = catalog.getFeatureTypeByName(name.getNamespaceURI(), name.getLocalPart());
+        FeatureTypeInfo meta = catalog.getFeatureTypeByName(name.getPrefix(), name.getLocalPart());
 
         if (meta == null) {
             String msg = "Could not locate " + name + " in catalog.";

@@ -22,6 +22,7 @@ import java.util.function.Predicate;
 import javax.annotation.Nullable;
 
 import org.geoserver.catalog.Catalog;
+import org.geoserver.catalog.CatalogCapabilities;
 import org.geoserver.catalog.CatalogFacade;
 import org.geoserver.catalog.CatalogInfo;
 import org.geoserver.catalog.DataStoreInfo;
@@ -169,6 +170,14 @@ public class DefaultCatalogFacade extends AbstractCatalogFacade implements Catal
      * the catalog
      */
     private CatalogImpl catalog;
+
+    /**
+     * Catalog capabilities supported by this facade.
+     */
+    private static final CatalogCapabilities CATALOG_CAPABILITIES = () -> {
+        // isolated workspaces are supported
+        return true;
+    };
     
     public DefaultCatalogFacade(Catalog catalog) {
         setCatalog(catalog);
@@ -673,7 +682,9 @@ public class DefaultCatalogFacade extends AbstractCatalogFacade implements Catal
     }
 
     public NamespaceInfo getNamespaceByURI(String uri) {
-        NamespaceInfo result = namespaces.findFirst(NamespaceInfo.class, ns -> uri.equals(ns.getURI()));
+        // when searching a name space by URI we need to make sure that we don't return an isolated namespace
+        NamespaceInfo result = namespaces.findFirst(
+                NamespaceInfo.class, ns -> uri.equals(ns.getURI()) && !ns.isIsolated());
         return wrapInModificationProxy(result, NamespaceInfo.class);
     }
 
@@ -1129,4 +1140,9 @@ public class DefaultCatalogFacade extends AbstractCatalogFacade implements Catal
         };
     }
 
+    @Override
+    public CatalogCapabilities getCatalogCapabilities() {
+        // return this facade supported capabilities
+        return CATALOG_CAPABILITIES;
+    }
 }

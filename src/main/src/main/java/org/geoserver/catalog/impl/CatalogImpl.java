@@ -22,6 +22,7 @@ import java.util.regex.Matcher;
 import org.geoserver.GeoServerConfigurationLock;
 import org.geoserver.catalog.Catalog;
 import org.geoserver.catalog.CatalogBuilder;
+import org.geoserver.catalog.CatalogCapabilities;
 import org.geoserver.catalog.CatalogException;
 import org.geoserver.catalog.CatalogFacade;
 import org.geoserver.catalog.CatalogFactory;
@@ -63,7 +64,6 @@ import org.geoserver.catalog.event.impl.CatalogModifyEventImpl;
 import org.geoserver.catalog.event.impl.CatalogPostModifyEventImpl;
 import org.geoserver.catalog.event.impl.CatalogRemoveEventImpl;
 import org.geoserver.catalog.util.CloseableIterator;
-import org.geoserver.config.GeoServer;
 import org.geoserver.ows.util.OwsUtils;
 import org.geoserver.platform.GeoServerExtensions;
 import org.geoserver.platform.GeoServerResourceLoader;
@@ -1092,6 +1092,14 @@ public class CatalogImpl implements Catalog {
     }
 
     public ValidationResult validate(NamespaceInfo namespace, boolean isNew) {
+
+        if (namespace.isIsolated() && !getCatalogCapabilities().areIsolatedWorkspacesSupported()) {
+            // isolated namespaces \ workspaces are not supported by this catalog
+            throw new IllegalArgumentException(String.format(
+                    "Namespace '%s:%s' is isolated but isolated workspaces are not supported by this catalog.",
+                    namespace.getPrefix(), namespace.getURI()));
+        }
+
         if ( isNull(namespace.getPrefix()) ) {
             throw new NullPointerException( "Namespace prefix must not be null");
         }
@@ -1104,10 +1112,13 @@ public class CatalogImpl implements Catalog {
         if ( existing != null && !existing.getId().equals( namespace.getId() ) ) {
             throw new IllegalArgumentException( "Namespace with prefix '" + namespace.getPrefix() + "' already exists.");
         }
-        
-        existing = getNamespaceByURI( namespace.getURI() );
-        if ( existing != null && !existing.getId().equals( namespace.getId() ) ) {
-            throw new IllegalArgumentException( "Namespace with URI '" + namespace.getURI() + "' already exists.");
+
+        if (!namespace.isIsolated()) {
+            // not an isolated namespace \ workplace so we need to check for duplicates
+            existing = getNamespaceByURI(namespace.getURI());
+            if (existing != null && !existing.getId().equals(namespace.getId())) {
+                throw new IllegalArgumentException("Namespace with URI '" + namespace.getURI() + "' already exists.");
+            }
         }
     
         if ( isNull(namespace.getURI()) ) {
@@ -1202,6 +1213,14 @@ public class CatalogImpl implements Catalog {
     }
     
     public ValidationResult validate(WorkspaceInfo workspace, boolean isNew) {
+
+        if (workspace.isIsolated() && !getCatalogCapabilities().areIsolatedWorkspacesSupported()) {
+            // isolated namespaces \ workspaces are not supported by this catalog
+            throw new IllegalArgumentException(String.format(
+                    "Workspace '%s' is isolated but isolated workspaces are not supported by this catalog.",
+                    workspace.getName()));
+        }
+
         if ( isNull(workspace.getName()) ) {
             throw new NullPointerException( "workspace name must not be null");
         }
@@ -1882,5 +1901,10 @@ public class CatalogImpl implements Catalog {
             it.close();
         }
         return result;
+    }
+
+    @Override
+    public CatalogCapabilities getCatalogCapabilities() {
+        return facade.getCatalogCapabilities();
     }
 }

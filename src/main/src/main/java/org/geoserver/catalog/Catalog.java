@@ -1769,4 +1769,14 @@ public interface Catalog extends CatalogInfo {
      */
     public void removeListeners(Class listenerClass);
 
+    /**
+     * Return the catalog capabilities supported by this catalog. Normally this will correspond
+     * to the capabilities supported by the used catalog facade.
+     *
+     * @return catalog supported capabilities
+     */
+    default CatalogCapabilities getCatalogCapabilities() {
+        // return catalog default capabilities
+        return CatalogCapabilities.DEFAULT;
+    }
 }

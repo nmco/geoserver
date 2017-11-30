@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.geoserver.catalog.Catalog;
+import org.geoserver.catalog.CatalogCapabilities;
 import org.geoserver.catalog.CatalogFacade;
 import org.geoserver.catalog.CatalogFactory;
 import org.geoserver.catalog.CatalogInfo;
@@ -601,4 +602,8 @@ class SecureCatalogFacade implements CatalogFacade {
         return catalog.list(of, filter, offset, count, sortOrder);
     }
 
+    @Override
+    public CatalogCapabilities getCatalogCapabilities() {
+        return catalog.getCatalogCapabilities();
+    }
 }

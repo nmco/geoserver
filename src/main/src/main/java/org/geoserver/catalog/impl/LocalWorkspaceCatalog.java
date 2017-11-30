@@ -11,9 +11,15 @@ import java.util.List;
 
 import org.geoserver.catalog.Catalog;
 import org.geoserver.catalog.CatalogInfo;
+import org.geoserver.catalog.CoverageInfo;
+import org.geoserver.catalog.CoverageStoreInfo;
+import org.geoserver.catalog.DataStoreInfo;
+import org.geoserver.catalog.FeatureTypeInfo;
 import org.geoserver.catalog.LayerGroupInfo;
 import org.geoserver.catalog.LayerInfo;
 import org.geoserver.catalog.NamespaceInfo;
+import org.geoserver.catalog.ResourceInfo;
+import org.geoserver.catalog.StoreInfo;
 import org.geoserver.catalog.StyleInfo;
 import org.geoserver.catalog.WorkspaceInfo;
 import org.geoserver.catalog.ValidationResult;
@@ -373,5 +379,137 @@ public class LocalWorkspaceCatalog extends AbstractCatalogDecorator implements C
             return LocalWorkspace.get();
         }
         return super.getDefaultWorkspace();
+    }
+
+    @Override
+    public NamespaceInfo getNamespaceByURI(String uri) {
+        // let's see if we are in the context of an isolated virtual service
+        if (isolatedVirtualService()) {
+            // get this workspace namespace
+            WorkspaceInfo workspace = LocalWorkspace.get();
+            // if the provided URI matches this isolated workspace namespace URI return it
+            NamespaceInfo namespace = delegate.getNamespaceByPrefix(workspace.getName());
+            if (uri.equals(namespace.getURI())) {
+                // return this isolated workspace namespace
+                return namespace;
+            }
+        }
+        // no spacial handling require we just need to return the namespace that matches the provided URI
+        return super.getNamespaceByURI(uri);
+    }
+
+    @Override
+    public <T extends ResourceInfo> T getResourceByName(String ns, String name, Class<T> clazz) {
+        NamespaceInfo namespace = getNamespaceByURI(ns);
+        return namespace == null ?
+                super.getResourceByName(ns, name, clazz) : super.getResourceByName(namespace, name, clazz);
+    }
+
+    @Override
+    public <T extends ResourceInfo> List<T> getResourcesByNamespace(String ns, Class<T> clazz) {
+        NamespaceInfo namespace = getNamespaceByURI(ns);
+        return namespace == null ?
+                super.getResourcesByNamespace(ns, clazz) : super.getResourcesByNamespace(namespace, clazz);
+    }
+
+    @Override
+    public FeatureTypeInfo getFeatureTypeByName(String ns, String name) {
+        NamespaceInfo namespace = getNamespaceByURI(ns);
+        return namespace == null ?
+                super.getFeatureTypeByName(ns, name) : super.getFeatureTypeByName(namespace, name);
+    }
+
+    @Override
+    public CoverageInfo getCoverageByName(String ns, String name) {
+        NamespaceInfo namespace = getNamespaceByURI(ns);
+        return namespace == null ?
+                super.getCoverageByName(ns, name) : super.getCoverageByName(namespace, name);
+    }
+
+    @Override
+    public <T extends StoreInfo> T getStoreByName(String name, Class<T> clazz) {
+        return super.getStoreByName(handleNamespaces(name), clazz);
+    }
+
+    @Override
+    public DataStoreInfo getDataStoreByName(String name) {
+        return super.getDataStoreByName(handleNamespaces(name));
+    }
+
+    @Override
+    public CoverageStoreInfo getCoverageStoreByName(String name) {
+        return super.getCoverageStoreByName(handleNamespaces(name));
+    }
+
+    @Override
+    public <T extends ResourceInfo> T getResourceByName(String name, Class<T> clazz) {
+        return super.getResourceByName(handleNamespaces(name), clazz);
+    }
+
+    @Override
+    public <T extends ResourceInfo> T getResourceByStore(StoreInfo store, String name, Class<T> clazz) {
+        return super.getResourceByStore(store, handleNamespaces(name), clazz);
+    }
+
+    @Override
+    public FeatureTypeInfo getFeatureTypeByName(String name) {
+        return super.getFeatureTypeByName(handleNamespaces(name));
+    }
+
+    @Override
+    public CoverageInfo getCoverageByName(String name) {
+        return super.getCoverageByName(handleNamespaces(name));
+    }
+
+    @Override
+    public <T extends ResourceInfo> T getResourceByName(Name name, Class<T> clazz) {
+        if (isolatedVirtualService()) {
+            return super.getResourceByName(handleNamespaces(name), clazz);
+        }
+        return super.getResourceByName(name, clazz);
+    }
+
+    @Override
+    public FeatureTypeInfo getFeatureTypeByName(Name name) {
+        if (isolatedVirtualService()) {
+            return super.getFeatureTypeByName(handleNamespaces(name));
+        }
+        return super.getFeatureTypeByName(name);
+    }
+
+    @Override
+    public CoverageInfo getCoverageByName(Name name) {
+        if (isolatedVirtualService()) {
+            return super.getCoverageByName(handleNamespaces(name));
+        }
+        return super.getCoverageByName(name);
+    }
+
+    private String handleNamespaces(String name) {
+        // let's see if we are in the context of a virtual service
+        if (!isolatedVirtualService() || name == null) {
+            return name;
+        }
+        int colon = name.indexOf( ':' );
+        if ( colon == -1 ) {
+            return name;
+        }
+        String localName = name.substring(colon + 1);
+        return LocalWorkspace.get().getName() + ":" + localName;
+    }
+
+    private String handleNamespaces(Name name) {
+        if (name == null) {
+            return null;
+        }
+        String localName = name.getLocalPart();
+        if (LocalWorkspace.get() == null) {
+            return localName;
+        }
+        return LocalWorkspace.get().getName() + ":" + localName;
+    }
+
+    private boolean isolatedVirtualService() {
+        return LocalWorkspace.get() != null && LocalWorkspace.get().isIsolated();
     }
 }

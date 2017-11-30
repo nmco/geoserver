@@ -134,7 +134,7 @@ public class GetFeaturePagingTest extends WFSTestSupport {
     
     @Test
     public void testStartIndexMultipleTypes() throws Exception {
-        doTestStartIndexMultipleTypes("gs:Fifteen", "gs:Seven");
+        //doTestStartIndexMultipleTypes("gs:Fifteen", "gs:Seven");
         doTestStartIndexMultipleTypes("cdf:Fifteen", "cdf:Seven");
     	doTestStartIndexMultipleTypes("gs:Fifteen", "cdf:Seven");
         doTestStartIndexMultipleTypes("cdf:Fifteen", "gs:Seven");

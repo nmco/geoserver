@@ -4,13 +4,13 @@
                         xsi:schemaLocation="http://www.geotools.org/app-schema AppSchemaDataAccess.xsd">
   <namespaces>
     <Namespace>
-      <prefix>ms_${GML_PREFIX}</prefix>
-      <uri>http://www.measurements_${GML_PREFIX}.org/1.0</uri>
+      <prefix>ms_gml32</prefix>
+      <uri>http://www.measurements_gml32.org/1.0</uri>
     </Namespace>
   </namespaces>
   <sourceDataStores>
     <DataStore>
-      <id>measurements_${GML_PREFIX}</id>
+      <id>measurements_gml32</id>
       <parameters>
         <Parameter>
           <name>directory</name>
@@ -21,25 +21,26 @@
   </sourceDataStores>
   <targetTypes>
     <FeatureType>
-      <schemaUri>measurements_${GML_PREFIX}.xsd</schemaUri>
+      <schemaUri>measurements_gml32.xsd</schemaUri>
     </FeatureType>
   </targetTypes>
   <typeMappings>
     <FeatureTypeMapping>
-      <sourceDataStore>measurements_${GML_PREFIX}</sourceDataStore>
-      <sourceType>measurements_${GML_PREFIX}</sourceType>
-      <targetElement>ms_${GML_PREFIX}:Measurement</targetElement>
+      <sourceDataStore>measurements_gml32</sourceDataStore>
+      <sourceType>measurements_gml32</sourceType>
+      <targetElement>ms_gml32:Measurement_gml32</targetElement>
+      <mappingName>isolated_1_measurement_gml32</mappingName>
       <attributeMappings>
         <AttributeMapping>
-          <targetAttribute>ms_${GML_PREFIX}:Measurement</targetAttribute>
+          <targetAttribute>ms_gml32:Measurement_gml32</targetAttribute>
           <idExpression>
             <OCQL>ID</OCQL>
           </idExpression>
         </AttributeMapping>
         <AttributeMapping>
-          <targetAttribute>ms_${GML_PREFIX}:name</targetAttribute>
+          <targetAttribute>ms_gml32:name</targetAttribute>
           <sourceExpression>
-            <OCQL>NAME</OCQL>
+            <OCQL>strConCat('isolated_1_', NAME)</OCQL>
           </sourceExpression>
         </AttributeMapping>
         <AttributeMapping>

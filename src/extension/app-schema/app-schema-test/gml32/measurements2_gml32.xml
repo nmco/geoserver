@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<as:AppSchemaDataAccess xmlns:as="http://www.geotools.org/app-schema"
+                        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                        xsi:schemaLocation="http://www.geotools.org/app-schema AppSchemaDataAccess.xsd">
+  <namespaces>
+    <Namespace>
+      <prefix>ms_gml32</prefix>
+      <uri>http://www.measurements_gml32.org/1.0</uri>
+    </Namespace>
+  </namespaces>
+  <sourceDataStores>
+    <DataStore>
+      <id>measurements_gml32</id>
+      <parameters>
+        <Parameter>
+          <name>directory</name>
+          <value>file:./</value>
+        </Parameter>
+      </parameters>
+    </DataStore>
+  </sourceDataStores>
+  <targetTypes>
+    <FeatureType>
+      <schemaUri>measurements_gml32.xsd</schemaUri>
+    </FeatureType>
+  </targetTypes>
+  <typeMappings>
+    <FeatureTypeMapping>
+      <sourceDataStore>measurements_gml32</sourceDataStore>
+      <sourceType>measurements_gml32</sourceType>
+      <targetElement>ms_gml32:Measurement_gml32</targetElement>
+      <mappingName>isolated_2_measurement_gml32</mappingName>
+      <attributeMappings>
+        <AttributeMapping>
+          <targetAttribute>ms_gml32:Measurement_gml32</targetAttribute>
+          <idExpression>
+            <OCQL>ID</OCQL>
+          </idExpression>
+        </AttributeMapping>
+        <AttributeMapping>
+          <targetAttribute>ms_gml32:name</targetAttribute>
+          <sourceExpression>
+            <OCQL>strConCat('isolated_2_', NAME)</OCQL>
+          </sourceExpression>
+        </AttributeMapping>
+        <AttributeMapping>
+          <targetAttribute>FEATURE_LINK[1]</targetAttribute>
+          <sourceExpression>
+            <OCQL>STATION</OCQL>
+          </sourceExpression>
+        </AttributeMapping>
+      </attributeMappings>
+    </FeatureTypeMapping>
+  </typeMappings>
+</as:AppSchemaDataAccess>

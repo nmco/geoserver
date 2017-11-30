@@ -22,6 +22,7 @@ import java.util.stream.Stream;
 
 import org.custommonkey.xmlunit.SimpleNamespaceContext;
 import org.custommonkey.xmlunit.XMLUnit;
+
 import org.custommonkey.xmlunit.XpathEngine;
 import org.geoserver.util.IOUtils;
 import org.geoserver.wfs.StoredQuery;
@@ -35,6 +36,10 @@ import org.junit.Test;
 import org.w3c.dom.Document;
 
 import net.opengis.wfs20.StoredQueryDescriptionType;
+import java.io.File;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  * Tests that namespaces are correctly handled by WFS and app-schema when
@@ -209,12 +214,6 @@ public final class NamespacesWfsTest extends AbstractAppSchemaTestSupport {
         }
     }
 
-    @Override
-    protected MockData createTestData() {
-        // instantiate our custom complex types
-        return new MockData();
-    }
-
     // xpath engines used to check WFS responses
     private XpathEngine WFS11_XPATH_ENGINE;
     private XpathEngine WFS20_XPATH_ENGINE;
@@ -222,16 +221,23 @@ public final class NamespacesWfsTest extends AbstractAppSchemaTestSupport {
     @Before
     public void beforeTest() {
         // instantiate WFS 1.1 xpath engine
-        WFS11_XPATH_ENGINE = buildXpathEngine(
+        WFS11_XPATH_ENGINE = StationsMockData.buildXpathEngine(
+                getTestData().getNamespaces(),
                 "wfs", "http://www.opengis.net/wfs",
                 "gml", "http://www.opengis.net/gml");
         // instantiate WFS 2.0 xpath engine
-        WFS20_XPATH_ENGINE = buildXpathEngine(
+        WFS20_XPATH_ENGINE = StationsMockData.buildXpathEngine(
+                getTestData().getNamespaces(),
                 "wfs", "http://www.opengis.net/wfs/2.0",
                 "gml", "http://www.opengis.net/gml/3.2");
     }
 
     /*** GetFeature tests ***/
+    @Override
+    protected StationsMockData createTestData() {
+        // instantiate our custom complex types
+        return new StationsMockData();
+    }
 
     @Test
     public void globalServiceGetFeatureNamespacesWfs11() throws Exception {
@@ -367,7 +373,7 @@ public final class NamespacesWfsTest extends AbstractAppSchemaTestSupport {
      */
     private void checkWfs11StationsGetFeatureResult(Document document) {
         checkCount(WFS11_XPATH_ENGINE, document, 1, "/wfs:FeatureCollection/gml:featureMember/" +
-                "st_gml31:Station_gml31[@gml:id='st.1']/st_gml31:measurements/ms_gml31:Measurement[ms_gml31:name='temperature']");
+                "st_gml31:Station_gml31[@gml:id='st.1']/st_gml31:measurements/ms_gml31:Measurement_gml31[ms_gml31:name='temperature']");
         checkCount(WFS11_XPATH_ENGINE, document, 1, "/wfs:FeatureCollection/gml:featureMember/" +
                 "st_gml31:Station_gml31[@gml:id='st.1']/st_gml31:location/gml:Point[gml:pos='1.0 -1.0']");
     }
@@ -377,7 +383,7 @@ public final class NamespacesWfsTest extends AbstractAppSchemaTestSupport {
      */
     private void checkWfs20StationsGetFeatureResult(Document document) {
         checkCount(WFS20_XPATH_ENGINE, document, 1, "/wfs:FeatureCollection/wfs:member/" +
-                "st_gml32:Station_gml32[@gml:id='st.1']/st_gml32:measurements/ms_gml32:Measurement[ms_gml32:name='temperature']");
+                "st_gml32:Station_gml32[@gml:id='st.1']/st_gml32:measurements/ms_gml32:Measurement_gml32[ms_gml32:name='temperature']");
         checkCount(WFS20_XPATH_ENGINE, document, 1, "/wfs:FeatureCollection/wfs:member/" +
                 "st_gml32:Station_gml32[@gml:id='st.1']/st_gml32:location/gml:Point[gml:pos='1.0 -1.0']");
     }
@@ -403,34 +409,5 @@ public final class NamespacesWfsTest extends AbstractAppSchemaTestSupport {
         } catch (Exception exception) {
             throw new RuntimeException("Error evaluating xpath.", exception);
         }
-    }
-
-    /**
-     * Helper method that builds a xpath engine that will use
-     * the provided GML namespaces.
-     */
-    private XpathEngine buildXpathEngine(String... namespaces) {
-        // build xpath engine
-        XpathEngine xpathEngine = XMLUnit.newXpathEngine();
-        Map<String, String> finalNamespaces = new HashMap<>();
-        // add common namespaces
-        finalNamespaces.put("ows", "http://www.opengis.net/ows");
-        finalNamespaces.put("ogc", "http://www.opengis.net/ogc");
-        finalNamespaces.put("xs", "http://www.w3.org/2001/XMLSchema");
-        finalNamespaces.put("xsd", "http://www.w3.org/2001/XMLSchema");
-        finalNamespaces.put("xlink", "http://www.w3.org/1999/xlink");
-        finalNamespaces.put("xsi", "http://www.w3.org/2001/XMLSchema-instance");
-        // add al catalog namespaces
-        finalNamespaces.putAll(getTestData().getNamespaces());
-        // add provided namespaces
-        if (namespaces.length % 2 != 0) {
-            throw new RuntimeException("Invalid number of namespaces provided.");
-        }
-        for (int i = 0; i < namespaces.length; i += 2) {
-            finalNamespaces.put(namespaces[i], namespaces[i + 1]);
-        }
-        // add namespaces to the xpath engine
-        xpathEngine.setNamespaceContext(new SimpleNamespaceContext(finalNamespaces));
-        return xpathEngine;
     }
 }
