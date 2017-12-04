@@ -1080,9 +1080,6 @@ public abstract class FeatureTypeSchemaBuilder {
      * to make it always return {@code null}.
      *
      * Useful when encoding DescribeFeatureType responses, as they don't need to import the WFS schema.
-     *
-     * @author Stefano Costa, GeoSolutions
-     *
      */
     public static final class GML32NoWfsSchemaImport extends GML32 {
 

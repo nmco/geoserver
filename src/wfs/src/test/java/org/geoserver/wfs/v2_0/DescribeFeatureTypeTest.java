@@ -417,8 +417,6 @@ public class DescribeFeatureTypeTest extends WFS20TestSupport {
 
     /**
      * Tests that WFS schema is not imported in a DescribeFeatureType response.
-     *
-     * @throws Exception
      */
     @Test
     public void testNoWfsSchemaImport() throws Exception {
@@ -428,7 +426,7 @@ public class DescribeFeatureTypeTest extends WFS20TestSupport {
                 "wfs?service=WFS&version=2.0.0&request=DescribeFeatureType&typeNames=" + typeName);
         assertThat(response.getContentType(), is("application/gml+xml; version=3.2"));
 
-        Document doc = dom(new ByteArrayInputStream(response.getContentAsString().getBytes()));
+        Document doc = dom(response, true);
 
         assertSchema(doc, CiteTestData.PRIMITIVEGEOFEATURE);
         assertXpathNotExists("//xsd:import[@namespace='" + WFS.NAMESPACE + "']", doc);

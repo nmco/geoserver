@@ -308,8 +308,6 @@ public class DescribeFeatureTypeTest extends WFSTestSupport {
 
     /**
      * Tests that WFS schema is not imported in a DescribeFeatureType response.
-     *
-     * @throws Exception
      */
     @Test
     public void testNoWfsSchemaImport() throws Exception {

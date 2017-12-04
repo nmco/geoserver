@@ -419,11 +419,9 @@ public class FeatureChainingWfsTest extends AbstractAppSchemaTestSupport {
      * <strong>Remarks:</strong> this test only targets WFS 2.0, as 1.1.0 is sufficiently covered
      * by other tests. 
      * </p>
-     *
-     * @throws Exception
      */
     @Test
-    public void testDescribeFeatureTypeNoWfsSchemaImport() throws Exception {
+    public void testDescribeFeatureTypeNoWfsSchemaImport() {
         // one feature type --> schema is included, no imports
         Document doc = getAsDOM(
                 "wfs?service=WFS&version=2.0.0&request=DescribeFeatureType&typenames=gsml:GeologicUnit");
