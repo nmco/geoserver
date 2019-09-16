@@ -8,7 +8,15 @@
  */
 package org.geoserver.wfs.remote.v2_0;
 
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertThat;
+
+import java.io.InputStream;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import org.geoserver.catalog.CascadeDeleteVisitor;
 import org.geoserver.catalog.Catalog;
 import org.geoserver.catalog.CatalogBuilder;
@@ -18,6 +26,7 @@ import org.geoserver.catalog.LayerInfo;
 import org.geoserver.catalog.TestHttpClientProvider;
 import org.geoserver.test.http.MockHttpClient;
 import org.geoserver.test.http.MockHttpResponse;
+import org.geoserver.util.IOUtils;
 import org.geoserver.wfs.v2_0.WFS20TestSupport;
 import org.geotools.data.DataAccess;
 import org.geotools.data.util.NullProgressListener;
@@ -25,10 +34,6 @@ import org.geotools.data.wfs.WFSDataStore;
 import org.geotools.data.wfs.WFSDataStoreFactory;
 import org.geotools.feature.NameImpl;
 import org.geotools.util.decorate.Wrapper;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertThat;
 import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletResponse;
 
@@ -37,6 +42,14 @@ public class WfsRemoteStoreTest extends WFS20TestSupport {
 
     @Test
     public void testAddRemoteWfsLayer() throws Exception {
+
+        // configure the test environment
+        Map<String, String> environment = new HashMap<>();
+        // get tiger roads schemas location
+        URL tigerRoadsSchema =
+                WfsRemoteStoreTest.class.getResource("tiger_roads_describe_feature_type.xml");
+        assertThat(tigerRoadsSchema, notNullValue());
+        environment.put("TIGER_ROADS_SCHEMA_LOCATION", tigerRoadsSchema.toString());
 
         // setup http mock for the remote WFS server
         MockHttpClient httpClient = new MockHttpClient();
@@ -58,7 +71,8 @@ public class WfsRemoteStoreTest extends WFS20TestSupport {
                         + "&OUTPUTFORMAT=application%2Fgml%2Bxml%3B+version%3D3.2"
                         + "&VERSION=2.0.0"
                         + "&SERVICE=WFS",
-                "tiger_roads_get_feature_resp_1.xml");
+                "tiger_roads_get_feature_resp_1.xml",
+                environment);
         registerHttpGetFromResource(
                 httpClient,
                 "/ows?PROPERTYNAME=the_geom%2CCFCC%2CNAME"
@@ -68,7 +82,8 @@ public class WfsRemoteStoreTest extends WFS20TestSupport {
                         + "&OUTPUTFORMAT=application%2Fgml%2Bxml%3B+version%3D3.2"
                         + "&VERSION=2.0.0"
                         + "&SERVICE=WFS",
-                "tiger_roads_get_feature_resp_1.xml");
+                "tiger_roads_get_feature_resp_1.xml",
+                environment);
 
         try {
             // add the remote wfs store using a file capabilities document
@@ -148,6 +163,33 @@ public class WfsRemoteStoreTest extends WFS20TestSupport {
         storeInfo = catalog.getStoreByName(name, DataStoreInfo.class);
         assertThat(storeInfo, notNullValue());
         return storeInfo;
+    }
+
+    /**
+     * Help method that register in the provided mock HTTP client an HTTP GET URL and the respective
+     * response, the response will be retrieved from the provided resource name which should be
+     * available in the class-path. The provided environment map will be used to substitute any
+     * matching place holder.
+     */
+    private static void registerHttpGetFromResource(
+            MockHttpClient httpClient,
+            String url,
+            String resourceName,
+            Map<String, String> environment)
+            throws Exception {
+        // get the resource URL
+        URL finalUrl = new URL(TestHttpClientProvider.MOCKSERVER + url);
+        try (InputStream input = WfsRemoteStoreTest.class.getResourceAsStream(resourceName)) {
+            assertThat(input, notNullValue());
+            // get the resource content to a string
+            String content = IOUtils.toString(input);
+            for (Map.Entry<String, String> entry : environment.entrySet()) {
+                // if a placeholder exists replace it whit the corresponding value
+                content = content.replaceAll("\\$\\{" + entry.getKey() + "}", entry.getValue());
+            }
+            // use the content resolved with the provided environment
+            httpClient.expectGet(finalUrl, new MockHttpResponse(content, "text/xml"));
+        }
     }
 
     /**
