@@ -70,16 +70,12 @@ public class WorkspaceNewPage extends GeoServerSecuredPage {
                     @Override
                     public WebMarkupContainer getPanel(String panelId) {
                         infoPanel = new WsNewBasicInfoPanel(panelId, model);
-                        ;
                         return infoPanel;
                     }
                 });
         if (!GeoServerExtensions.extensions(ModuleStatus.class)
                 .stream()
-                .anyMatch(
-                        m ->
-                                m.hasCapability(
-                                        ModuleCapabilities.Capability.ADVANCED_SECURITY_CONFIG))) {
+                .anyMatch(m -> m.hasCapability(ModuleCapabilities.ADVANCED_SECURITY_CONFIG))) {
             tabs.add(
                     new AbstractTab(new Model<>("Security")) {
 

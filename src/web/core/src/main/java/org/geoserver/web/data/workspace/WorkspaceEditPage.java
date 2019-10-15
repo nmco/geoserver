@@ -152,10 +152,7 @@ public class WorkspaceEditPage extends GeoServerSecuredPage {
                 });
         if (!GeoServerExtensions.extensions(ModuleStatus.class)
                 .stream()
-                .anyMatch(
-                        m ->
-                                m.hasCapability(
-                                        ModuleCapabilities.Capability.ADVANCED_SECURITY_CONFIG))) {
+                .anyMatch(m -> m.hasCapability(ModuleCapabilities.ADVANCED_SECURITY_CONFIG))) {
             tabs.add(
                     new AbstractTab(new Model<String>("Security")) {
 

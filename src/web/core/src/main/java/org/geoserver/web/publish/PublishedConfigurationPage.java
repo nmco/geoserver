@@ -146,10 +146,7 @@ public abstract class PublishedConfigurationPage<T extends PublishedInfo>
                 GeoServerExtensions.extensions(ModuleStatus.class)
                         .stream()
                         .anyMatch(
-                                m ->
-                                        m.hasCapability(
-                                                ModuleCapabilities.Capability
-                                                        .ADVANCED_SECURITY_CONFIG));
+                                m -> m.hasCapability(ModuleCapabilities.ADVANCED_SECURITY_CONFIG));
         for (PublishedEditTabPanelInfo ttabPanelInfo : tabPanels) {
             if (ttabPanelInfo.supports(getPublishedInfo())) {
 
