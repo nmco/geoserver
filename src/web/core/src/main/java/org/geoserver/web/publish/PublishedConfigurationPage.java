@@ -29,6 +29,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.CompoundPropertyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
+import org.geoserver.catalog.LayerGroupInfo;
 import org.geoserver.catalog.LayerInfo;
 import org.geoserver.catalog.PublishedInfo;
 import org.geoserver.platform.GeoServerExtensions;
@@ -67,6 +68,8 @@ public abstract class PublishedConfigurationPage<T extends PublishedInfo>
     protected boolean isNew;
 
     protected TabbedPanel tabbedPanel;
+
+    private ITab dataAccessTab;
 
     /**
      * {@link PublishedEditTabPanel} contributions may need to edit something different than the
@@ -165,12 +168,8 @@ public abstract class PublishedConfigurationPage<T extends PublishedInfo>
 
                 final Class<PublishedEditTabPanel<T>> panelClass = tabPanelInfo.getComponentClass();
                 IModel<?> panelCustomModel = tabPanelInfo.createOwnModel(myModel, isNew);
-                if (tabPanelInfo instanceof LayerAccessDataRulePanelInfo
-                        && hasAdvancedSecurtyCapability) {
-                    continue;
-                }
                 tabPanelCustomModels.put(panelClass, panelCustomModel);
-                tabs.add(
+                ITab currentTab =
                         new AbstractTab(titleModel) {
                             private static final long serialVersionUID = -6637277497986497791L;
                             private final Class<PublishedEditTabPanel<T>> panelType = panelClass;
@@ -206,7 +205,15 @@ public abstract class PublishedConfigurationPage<T extends PublishedInfo>
                                 }
                                 return tabPanel;
                             }
-                        });
+                        };
+                if (tabPanelInfo instanceof LayerAccessDataRulePanelInfo) {
+                    if (hasAdvancedSecurtyCapability) {
+                        continue;
+                    } else {
+                        dataAccessTab = currentTab;
+                    }
+                }
+                tabs.add(currentTab);
             }
         }
 
@@ -224,7 +231,19 @@ public abstract class PublishedConfigurationPage<T extends PublishedInfo>
 
                             @Override
                             public void onSubmit() {
-                                setSelectedTab(index);
+                                if (isEnabled()) setSelectedTab(index);
+                                else setSelectedTab(getSelectedTab());
+                            }
+
+                            @Override
+                            public boolean isEnabled() {
+                                if (getPublishedInfo() instanceof LayerGroupInfo) {
+                                    if (tabs.get(index).equals(dataAccessTab)) {
+                                        LayerGroupInfo group = (LayerGroupInfo) getPublishedInfo();
+                                        if (group.getWorkspace() == null) return false;
+                                    }
+                                }
+                                return true;
                             }
                         };
                     }
