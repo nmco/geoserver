@@ -24,16 +24,14 @@ public class JSONLDGetFeatureResponseTest extends AbstractAppSchemaTestSupport {
     Catalog catalog;
     FeatureTypeInfo typeInfo;
     FeatureTypeInfo typeInfo2;
-    FeatureTypeInfo simpleFeatureType;
     GeoServerDataDirectory dd;
 
     @Before
-    public void before() throws IOException {
+    public void before() {
         catalog = getCatalog();
 
         typeInfo = catalog.getFeatureTypeByName("gsml", "MappedFeature");
         typeInfo2 = catalog.getFeatureTypeByName("gsml", "GeologicUnit");
-        simpleFeatureType = catalog.getFeatureTypeByName("cdf", "Fifteen");
         dd = (GeoServerDataDirectory) applicationContext.getBean("dataDirectory");
     }
 
