@@ -1,29 +1,22 @@
-JSON-LD Output Format
-============================
+JSON-LD output
+==============
 
-JSON-LD Output Format
----------------------
+JSON-LD output
+--------------
 
-
-In order to obtain a json-ld output format, request's media type must be specified as "application/ld+json".
-From Geoserver UI it is possible to have a preview of the format by choosing JSON-LD format by the layer preview page.
+In order to obtain a JSON-LD output format, request media type must be specified as ``application/ld+json``. From GeoServer UI it is possible to have a preview of the format by choosing JSON-LD format by the layer preview page.
 
 .. figure:: images/json-ld_preview.png
 
    Dropdown menu in Layer preview page.
 
-
-
 If OGC Feature API extension is enabled the output format is available from the collection page as well.
-
 
 .. figure:: images/json-ld_wfs3.png
 
    Dropdown menu in OGC Feature API collection page.
 
-
-
-The output, given the template file showed in the configuration section, will look like 
+The output, given the template file showed in the configuration section, will look like the following: 
 
 .. code-block:: json
 

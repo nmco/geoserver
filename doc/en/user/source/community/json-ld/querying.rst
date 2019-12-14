@@ -1,5 +1,5 @@
-JSON-LD Bacward Mapping
-============================
+JSON-LD backward mapping
+========================
 
 JSON-LD Querying
 ---------------------
