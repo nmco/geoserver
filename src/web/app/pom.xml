@@ -519,6 +519,16 @@
       </dependencies>
     </profile>
     <profile>
+      <id>smart-app-schema</id>
+      <dependencies>
+        <dependency>
+            <groupId>org.geoserver.extension</groupId>
+            <artifactId>gs-app-schema-smart</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+      </dependencies>
+    </profile>
+    <profile>
       <id>programming-guide</id>
       <dependencies>
         <dependency>

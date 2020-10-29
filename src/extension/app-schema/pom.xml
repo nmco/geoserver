@@ -41,10 +41,21 @@
                 <role>Java Developer</role>
             </roles>
         </developer>
+        <developer>
+            <name>Jose Macchi</name>
+            <id>jemacchi</id>
+            <email>jose.macchi@geo-solutions.it</email>
+            <organization>GeoSolutions</organization>
+            <roles>
+                <role>Module Maintainer</role>
+                <role>Java Developer</role>
+            </roles>
+        </developer>
     </developers>
 
     <modules>
         <module>app-schema-core</module>
+        <module>app-schema-smart</module>
         <module>app-schema-test</module>
         <module>sample-data-access-test</module>
     </modules>
@@ -64,6 +75,7 @@
                 <module>app-schema-mongo-test</module>
                 <module>app-schema-solr-test</module>
                 <module>app-schema-indexes-test</module>
+                <module>app-schema-smart</module>
             </modules>
             <dependencies>
                 <dependency>

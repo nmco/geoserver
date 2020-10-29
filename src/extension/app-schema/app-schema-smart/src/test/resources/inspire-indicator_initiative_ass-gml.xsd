@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?><xs:schema xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:inspire="http://www.api4inspire.it/smartappschema/1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema" attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://www.api4inspire.it/smartappschema/1.0" version="1.0">
+  <xs:import namespace="http://www.opengis.net/gml/3.2" schemaLocation="http://schemas.opengis.net/gml/3.2.1/gml.xsd"/>
+  <xs:complexType name="indicator_initiative_assType">
+    <xs:complexContent>
+      <xs:extension base="gml:AbstractFeatureType">
+        <xs:sequence>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="indicators_t" type="inspire:indicatorsPropertyType"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="endpoint_t" type="inspire:endpointPropertyType"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="indicator_initiative_ass_t" substitutionGroup="gml:AbstractFeature" type="inspire:indicator_initiative_assType"/>
+  <xs:complexType name="indicatorsType">
+    <xs:complexContent>
+      <xs:extension base="gml:AbstractFeatureType">
+        <xs:sequence>
+          <xs:element maxOccurs="1" minOccurs="0" name="code" type="xs:string"/>
+          <xs:element maxOccurs="1" minOccurs="0" name="description" type="xs:string"/>
+          <xs:element maxOccurs="1" minOccurs="0" name="methodologies" type="xs:string"/>
+          <xs:element maxOccurs="1" minOccurs="0" name="parameters" type="xs:string"/>
+          <xs:element maxOccurs="1" minOccurs="0" name="uom" type="xs:string"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="vocabularies_t" type="inspire:vocabulariesPropertyType"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="indicators_t" substitutionGroup="gml:AbstractFeature" type="inspire:indicatorsType"/>
+  <xs:complexType name="indicatorsPropertyType">
+    <xs:sequence minOccurs="0">
+      <xs:element ref="inspire:indicators_t"/>
+    </xs:sequence>
+    <xs:attributeGroup ref="gml:AssociationAttributeGroup"/>
+  </xs:complexType>
+  <xs:complexType name="vocabulariesType">
+    <xs:complexContent>
+      <xs:extension base="gml:AbstractFeatureType">
+        <xs:sequence>
+          <xs:element maxOccurs="1" minOccurs="0" name="name" type="xs:string"/>
+          <xs:element maxOccurs="1" minOccurs="0" name="url" type="xs:string"/>
+          <xs:element maxOccurs="1" minOccurs="0" name="comments" type="xs:string"/>
+          <xs:element maxOccurs="1" minOccurs="0" name="domain" type="xs:string"/>
+          <xs:element maxOccurs="1" minOccurs="0" name="prj_code" type="xs:int"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="vocabularies_t" substitutionGroup="gml:AbstractFeature" type="inspire:vocabulariesType"/>
+  <xs:complexType name="vocabulariesPropertyType">
+    <xs:sequence minOccurs="0">
+      <xs:element ref="inspire:vocabularies_t"/>
+    </xs:sequence>
+    <xs:attributeGroup ref="gml:AssociationAttributeGroup"/>
+  </xs:complexType>
+  <xs:complexType name="endpointType">
+    <xs:complexContent>
+      <xs:extension base="gml:AbstractFeatureType">
+        <xs:sequence>
+          <xs:element maxOccurs="1" minOccurs="0" name="id" type="xs:int"/>
+          <xs:element maxOccurs="1" minOccurs="0" name="url" type="xs:string"/>
+          <xs:element maxOccurs="1" minOccurs="0" name="type" type="xs:string"/>
+          <xs:element maxOccurs="1" minOccurs="0" name="description" type="xs:string"/>
+          <xs:element maxOccurs="1" minOccurs="0" name="mirror" type="xs:string"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="initiative_t" type="inspire:initiativePropertyType"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="access_mode_t" type="inspire:access_modePropertyType"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="data_type_t" type="inspire:data_typePropertyType"/>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="output_format_t" type="inspire:output_formatPropertyType"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="endpoint_t" substitutionGroup="gml:AbstractFeature" type="inspire:endpointType"/>
+  <xs:complexType name="endpointPropertyType">
+    <xs:sequence minOccurs="0">
+      <xs:element ref="inspire:endpoint_t"/>
+    </xs:sequence>
+    <xs:attributeGroup ref="gml:AssociationAttributeGroup"/>
+  </xs:complexType>
+  <xs:complexType name="initiativeType">
+    <xs:complexContent>
+      <xs:extension base="gml:AbstractFeatureType">
+        <xs:sequence>
+          <xs:element maxOccurs="1" minOccurs="0" name="prj_code" type="xs:int"/>
+          <xs:element maxOccurs="1" minOccurs="0" name="name" type="xs:string"/>
+          <xs:element maxOccurs="1" minOccurs="0" name="website" type="xs:string"/>
+          <xs:element maxOccurs="1" minOccurs="0" name="status" type="xs:string"/>
+          <xs:element maxOccurs="1" minOccurs="0" name="project_leader" type="xs:string"/>
+          <xs:element maxOccurs="1" minOccurs="0" name="project_partners" type="xs:string"/>
+          <xs:element maxOccurs="1" minOccurs="0" name="startdate" type="xs:dateTime"/>
+          <xs:element maxOccurs="1" minOccurs="0" name="enddate" type="xs:dateTime"/>
+          <xs:element maxOccurs="1" minOccurs="0" name="description" type="xs:string"/>
+          <xs:element maxOccurs="1" minOccurs="0" name="geographicalscope" type="xs:string"/>
+          <xs:element maxOccurs="1" minOccurs="0" name="geographicalscope_details" type="xs:string"/>
+          <xs:element maxOccurs="1" minOccurs="0" name="conditions_access_use" type="xs:string"/>
+          <xs:element maxOccurs="1" minOccurs="0" name="conditions_access_use_details" type="xs:string"/>
+          <xs:element maxOccurs="1" minOccurs="0" name="barriers" type="xs:string"/>
+          <xs:element maxOccurs="1" minOccurs="0" name="lessons_learnt" type="xs:string"/>
+          <xs:element maxOccurs="1" minOccurs="0" name="useful_links" type="xs:string"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="initiative_t" substitutionGroup="gml:AbstractFeature" type="inspire:initiativeType"/>
+  <xs:complexType name="initiativePropertyType">
+    <xs:sequence minOccurs="0">
+      <xs:element ref="inspire:initiative_t"/>
+    </xs:sequence>
+    <xs:attributeGroup ref="gml:AssociationAttributeGroup"/>
+  </xs:complexType>
+  <xs:complexType name="access_modeType">
+    <xs:complexContent>
+      <xs:extension base="gml:AbstractFeatureType">
+        <xs:sequence>
+          <xs:element maxOccurs="1" minOccurs="0" name="access_mode" type="xs:string"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="access_mode_t" substitutionGroup="gml:AbstractFeature" type="inspire:access_modeType"/>
+  <xs:complexType name="access_modePropertyType">
+    <xs:sequence minOccurs="0">
+      <xs:element ref="inspire:access_mode_t"/>
+    </xs:sequence>
+    <xs:attributeGroup ref="gml:AssociationAttributeGroup"/>
+  </xs:complexType>
+  <xs:complexType name="data_typeType">
+    <xs:complexContent>
+      <xs:extension base="gml:AbstractFeatureType">
+        <xs:sequence>
+          <xs:element maxOccurs="1" minOccurs="0" name="data_type" type="xs:string"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="data_type_t" substitutionGroup="gml:AbstractFeature" type="inspire:data_typeType"/>
+  <xs:complexType name="data_typePropertyType">
+    <xs:sequence minOccurs="0">
+      <xs:element ref="inspire:data_type_t"/>
+    </xs:sequence>
+    <xs:attributeGroup ref="gml:AssociationAttributeGroup"/>
+  </xs:complexType>
+  <xs:complexType name="output_formatType">
+    <xs:complexContent>
+      <xs:extension base="gml:AbstractFeatureType">
+        <xs:sequence>
+          <xs:element maxOccurs="1" minOccurs="0" name="output_format" type="xs:string"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="output_format_t" substitutionGroup="gml:AbstractFeature" type="inspire:output_formatType"/>
+  <xs:complexType name="output_formatPropertyType">
+    <xs:sequence minOccurs="0">
+      <xs:element ref="inspire:output_format_t"/>
+    </xs:sequence>
+    <xs:attributeGroup ref="gml:AssociationAttributeGroup"/>
+  </xs:complexType>
+</xs:schema>
