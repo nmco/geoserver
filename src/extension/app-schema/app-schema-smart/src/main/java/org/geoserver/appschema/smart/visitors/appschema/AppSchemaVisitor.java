@@ -14,7 +14,6 @@ import static org.geoserver.appschema.smart.visitors.appschema.AppSchemaUtils.ge
 import static org.geoserver.appschema.smart.visitors.appschema.AppSchemaUtils.getSourceDataStoreId;
 import static org.geoserver.appschema.smart.visitors.appschema.AppSchemaUtils.getSourceDataStoresNode;
 import static org.geoserver.appschema.smart.visitors.appschema.AppSchemaUtils.getTypeMappingsNode;
-import static org.geoserver.appschema.smart.visitors.gml.GmlSchemaUtils.TABLE_SUFFIX;
 
 import java.util.logging.Logger;
 import org.geoserver.appschema.smart.domain.DomainModelVisitorImpl;
@@ -86,13 +85,11 @@ public final class AppSchemaVisitor extends DomainModelVisitorImpl {
         String containingTargetElementValue =
                 this.targetNamespacePrefix
                         + ":"
-                        + relation.getContainingEntity().getName()
-                        + TABLE_SUFFIX;
+                        + relation.getContainingEntity().getGmlInfo().featureTypeName();
         String destinationTargetElementValue =
                 this.targetNamespacePrefix
                         + ":"
-                        + relation.getDestinationEntity().getName()
-                        + TABLE_SUFFIX;
+                        + relation.getDestinationEntity().getGmlInfo().featureTypeName();
 
         int count = 1;
         Node destinationFeatureTypeMapping =
@@ -117,7 +114,7 @@ public final class AppSchemaVisitor extends DomainModelVisitorImpl {
         Node attributeMappingNode =
                 createLinkedAttributeMapping(
                         appDocument,
-                        destinationTargetElementValue,
+                        relation.getDestinationEntity().getGmlInfo().complexTypeAttributeName(),
                         relation.getContainingKeyAttribute().getName(),
                         destinationTargetElementValue,
                         linkName);
@@ -140,7 +137,7 @@ public final class AppSchemaVisitor extends DomainModelVisitorImpl {
         String sourceDataStoreValue = getSourceDataStoreId(appDocument);
         String sourceTypeValue = entity.getName();
         String targetElementValue =
-                this.targetNamespacePrefix + ":" + entity.getName() + TABLE_SUFFIX;
+                this.targetNamespacePrefix + ":" + entity.getGmlInfo().featureTypeName();
         // check if featureTypeMapping node is present in document
         Node featureTypeMappingNode = getFeatureTypeMapping(appDocument, targetElementValue);
         if (featureTypeMappingNode != null) {
@@ -156,6 +153,6 @@ public final class AppSchemaVisitor extends DomainModelVisitorImpl {
     }
 
     public Document getDocument() {
-        return (Document) appDocument;
+        return appDocument;
     }
 }

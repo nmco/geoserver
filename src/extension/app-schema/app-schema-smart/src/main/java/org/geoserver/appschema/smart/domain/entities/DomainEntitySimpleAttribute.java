@@ -2,11 +2,7 @@ package org.geoserver.appschema.smart.domain.entities;
 
 import org.geoserver.appschema.smart.domain.DomainModelVisitor;
 
-/**
- * Class representing an attribute of an entity on the Smart AppSchema model.
- *
- * @author Jose Macchi - GeoSolutions
- */
+/** Represents a simple attribute of a domain entity. */
 public final class DomainEntitySimpleAttribute {
 
     private String name;

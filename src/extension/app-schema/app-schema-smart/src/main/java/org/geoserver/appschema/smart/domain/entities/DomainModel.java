@@ -4,11 +4,8 @@ import org.geoserver.appschema.smart.domain.DomainModelVisitor;
 import org.geoserver.appschema.smart.metadata.DataStoreMetadata;
 
 /**
- * This class contains the information about model (entities, attributes and relations) that will be
- * used to create the output representations in AppSchema Smart. It's defined by a DataStoreMetadata
- * (source of objects to map) and the rootEntity of the AppSchema model that will be done.
- *
- * @author Jose Macchi - GeoSolutions
+ * Contains the definition of a domain model, the navigation of a domain model should be done
+ * thought the visitor API.
  */
 public class DomainModel {
 
@@ -20,16 +17,19 @@ public class DomainModel {
         this.rootEntity = rootEntity;
     }
 
+    /** Will visitor the domain model definition with the provided visitor. */
     public void accept(DomainModelVisitor visitor) {
         visitor.visitDomainModel(this);
         visitor.visitDataStoreMetadata(dataStoreMetadata);
         rootEntity.accept(visitor, true);
     }
 
+    /** Return the root entity of the domain model. */
     public DomainEntity getRootEntity() {
         return rootEntity;
     }
 
+    /** Returns the raw metadata obtained from the data store to build the domain model. */
     public DataStoreMetadata getDataStoreMetadata() {
         return dataStoreMetadata;
     }

@@ -12,7 +12,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-/** This class contains helper methods useful to generate a GML schema. */
+/** This class contains helper methods useful to generate a GML schema for a domain entity. */
 public final class GmlSchemaUtils {
 
     private static final Map<DomainAttributeType, String> DOMAIN_TYPES_MAPPING = new HashMap<>();
@@ -24,8 +24,6 @@ public final class GmlSchemaUtils {
         DOMAIN_TYPES_MAPPING.put(DomainAttributeType.DATE, "xs:dateTime");
         DOMAIN_TYPES_MAPPING.put(DomainAttributeType.GEOMETRY, "gml:GeometryPropertyType");
     }
-
-    public static final String TABLE_SUFFIX = "_t";
 
     private GmlSchemaUtils() {}
 
@@ -85,7 +83,7 @@ public final class GmlSchemaUtils {
     static Element createFeatureTypeNode(Document gmlSchema, DomainEntity entity) {
         // create complex type node
         Element complexTypeNode = gmlSchema.createElement("xs:complexType");
-        complexTypeNode.setAttribute("name", entity.getName() + "Type");
+        complexTypeNode.setAttribute("name", entity.getGmlInfo().complexTypeName());
         // create the content node
         Element complexContentNode = gmlSchema.createElement("xs:complexContent");
         complexTypeNode.appendChild(complexContentNode);
@@ -118,7 +116,7 @@ public final class GmlSchemaUtils {
             Document gmlSchema, DomainEntity entity, String targetNamespacePrefix) {
         // create complex type node
         Element complexTypeNode = gmlSchema.createElement("xs:complexType");
-        complexTypeNode.setAttribute("name", entity.getName() + "PropertyType");
+        complexTypeNode.setAttribute("name", entity.getGmlInfo().complexPropertyTypeName());
         // create the sequence node
         Element sequenceNode = gmlSchema.createElement("xs:sequence");
         sequenceNode.setAttribute("minOccurs", "0");
@@ -126,7 +124,7 @@ public final class GmlSchemaUtils {
         // create the element node
         Element elementNode = gmlSchema.createElement("xs:element");
         elementNode.setAttribute(
-                "ref", targetNamespacePrefix + ":" + entity.getName() + TABLE_SUFFIX);
+                "ref", targetNamespacePrefix + ":" + entity.getGmlInfo().featureTypeName());
         sequenceNode.appendChild(elementNode);
         // create the attribute group node
         Element attributeGroupNode = gmlSchema.createElement("xs:attributeGroup");
@@ -148,8 +146,9 @@ public final class GmlSchemaUtils {
             Document gmlSchema, DomainEntity entity, String targetNamespacePrefix) {
         // create element node
         Element elementNode = gmlSchema.createElement("xs:element");
-        elementNode.setAttribute("name", entity.getName() + TABLE_SUFFIX);
-        elementNode.setAttribute("type", targetNamespacePrefix + ":" + entity.getName() + "Type");
+        elementNode.setAttribute("name", entity.getGmlInfo().featureTypeName());
+        elementNode.setAttribute(
+                "type", targetNamespacePrefix + ":" + entity.getGmlInfo().complexTypeName());
         elementNode.setAttribute("substitutionGroup", "gml:AbstractFeature");
         // we are done, return the created element detached from the document
         return elementNode;
@@ -187,31 +186,34 @@ public final class GmlSchemaUtils {
             Document gmlSchema, DomainEntity destinationEntity, String targetNamespacePrefix) {
         // create element node
         Element elementNode = gmlSchema.createElement("xs:element");
-        elementNode.setAttribute("name", destinationEntity.getName() + TABLE_SUFFIX);
+        elementNode.setAttribute("name", destinationEntity.getGmlInfo().complexTypeAttributeName());
         elementNode.setAttribute("minOccurs", "0");
         elementNode.setAttribute("maxOccurs", "unbounded");
         elementNode.setAttribute(
-                "type", targetNamespacePrefix + ":" + destinationEntity.getName() + "PropertyType");
+                "type",
+                targetNamespacePrefix
+                        + ":"
+                        + destinationEntity.getGmlInfo().complexPropertyTypeName());
         // we are done, return the created element detached from the document
         return elementNode;
     }
 
     /**
-     * Get a FeatureElement from the document based on the featureType name
-     *
-     * @param gmlSchema
-     * @param featureTypeName
-     * @return Node representing the FeatureType
+     * Helper method that finds a complex type declaration by name on the provided GML document.
+     * NULL is returned if no matching complex type declaration is found.
      */
-    static Node getFeatureElementNodeByName(Document gmlSchema, String featureTypeName) {
+    static Node getFeatureElementNodeByName(Document gmlSchema, String complexTypeName) {
         NodeList complexTypes = gmlSchema.getElementsByTagName("xs:complexType");
         for (int i = 0; i < complexTypes.getLength(); i++) {
-            Node nNode = complexTypes.item(i);
-            String nNodeComplexTypeName = nNode.getAttributes().getNamedItem("name").getNodeValue();
-            if (nNodeComplexTypeName.equals(featureTypeName)) {
-                return nNode;
+            Node candidateNode = complexTypes.item(i);
+            String candidateName =
+                    candidateNode.getAttributes().getNamedItem("name").getNodeValue();
+            if (candidateName.equals(complexTypeName)) {
+                // we found our complex type
+                return candidateNode;
             }
         }
+        // no type found
         return null;
     }
 }

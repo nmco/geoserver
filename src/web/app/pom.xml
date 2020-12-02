@@ -512,6 +512,11 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+          <groupId>org.geoserver.extension</groupId>
+          <artifactId>gs-app-schema-smart</artifactId>
+          <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.geotools</groupId>
             <artifactId>gt-app-schema</artifactId>
             <version>${gt.version}</version>

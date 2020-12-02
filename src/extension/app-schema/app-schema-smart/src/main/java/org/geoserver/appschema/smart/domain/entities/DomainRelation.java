@@ -3,9 +3,8 @@ package org.geoserver.appschema.smart.domain.entities;
 import org.geoserver.appschema.smart.domain.DomainModelVisitor;
 
 /**
- * Class representing a relation between two entities on the Smart AppSchema model.
- *
- * @author Jose Macchi - GeoSolutions
+ * Represents a relation between two entities fo the domain model. Entities are rleated by a key
+ * attribute and there is a containing and a destination entity.
  */
 public final class DomainRelation {
 
@@ -18,12 +17,12 @@ public final class DomainRelation {
         return containingEntity;
     }
 
-    public DomainEntity getDestinationEntity() {
-        return destinationEntity;
-    }
-
     public void setContainingEntity(DomainEntity containingEntity) {
         this.containingEntity = containingEntity;
+    }
+
+    public DomainEntity getDestinationEntity() {
+        return destinationEntity;
     }
 
     public void setDestinationEntity(DomainEntity destinationEntity) {
@@ -46,6 +45,7 @@ public final class DomainRelation {
         this.destinationKeyAttribute = destinationKeyAttribute;
     }
 
+    /** Will visit this domain relation with the provided visitor. */
     public void accept(DomainModelVisitor visitor) {
         visitor.visitDomainRelation(this);
         destinationEntity.accept(visitor, false);

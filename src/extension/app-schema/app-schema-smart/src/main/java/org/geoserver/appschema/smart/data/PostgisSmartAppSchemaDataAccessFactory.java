@@ -6,8 +6,6 @@ import java.io.Serializable;
 import java.net.URI;
 import java.net.URL;
 import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -148,11 +146,11 @@ public class PostgisSmartAppSchemaDataAccessFactory implements DataAccessFactory
         parameters.put(ROOT_ENTITY.key, ROOT_ENTITY);
         parameters.put(DOMAIN_MODEL_EXCLUSIONS.key, DOMAIN_MODEL_EXCLUSIONS);
     }
-    
+
     private String getFilenamePrefix(Map params) throws IOException {
-    	String rootEntity = lookup(ROOT_ENTITY, params, String.class);
-        String filenamePrefix = rootEntity ;
-    	return filenamePrefix;
+        String rootEntity = lookup(ROOT_ENTITY, params, String.class);
+        String filenamePrefix = rootEntity;
+        return filenamePrefix;
     }
     /**
      * Helper method that based on parameters, builds domainmodel, generates associated mapping

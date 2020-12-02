@@ -1,9 +1,8 @@
 package org.geoserver.appschema.smart.domain.entities;
 
 /**
- * Enum representing a relation type of a relation on the Smart AppSchema model.
- *
- * @author Jose Macchi - Geosolutions
+ * Cardinality of a relation of the domain model, the direction goes from the cotnaining entity to
+ * the destination entity.
  */
 public enum DomainRelationType {
     ONEONE,

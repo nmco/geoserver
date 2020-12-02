@@ -6,11 +6,7 @@ import org.geoserver.appschema.smart.domain.entities.DomainModel;
 import org.geoserver.appschema.smart.domain.entities.DomainRelation;
 import org.geoserver.appschema.smart.metadata.DataStoreMetadata;
 
-/**
- * DomainModelVisitorImpl
- *
- * @author Jose Macchi - GeoSolutions
- */
+/** Default implementation for a domain model visitor. */
 public class DomainModelVisitorImpl implements DomainModelVisitor {
 
     @Override

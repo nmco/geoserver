@@ -289,7 +289,7 @@ public final class AppSchemaUtils {
         sourceExpressionNode.appendChild(OCQLNode);
         Element isMultiple = document.createElement("isMutiple");
         isMultiple.setTextContent("true");
-        attributeMappingNode.appendChild(isMultiple);
+        // attributeMappingNode.appendChild(isMultiple);
         attributeMappingNode.appendChild(targetAttributeNode);
         attributeMappingNode.appendChild(sourceExpressionNode);
 

@@ -5,7 +5,6 @@ import static org.junit.Assert.assertNotNull;
 
 import java.io.Serializable;
 import java.util.Map;
-
 import org.apache.wicket.util.tester.FormTester;
 import org.geoserver.appschema.smart.SmartAppSchemaGeoServerTestSupport;
 import org.geoserver.appschema.smart.data.PostgisSmartAppSchemaDataAccessFactory;

@@ -1,10 +1,6 @@
 package org.geoserver.appschema.smart.domain.entities;
 
-/**
- * Enum representing the type of an entity's attribute at Smart AppSchema model.
- *
- * @author Jose Macchi - Geosolutions
- */
+/** Domain entity possible simple attributes. */
 public enum DomainAttributeType {
     NUMBER,
     INT,

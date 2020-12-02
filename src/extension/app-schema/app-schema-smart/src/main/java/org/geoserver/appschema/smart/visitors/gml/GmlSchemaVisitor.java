@@ -59,7 +59,7 @@ public final class GmlSchemaVisitor extends DomainModelVisitorImpl {
         }
         Node featureTypeNode =
                 getFeatureElementNodeByName(
-                        gmlDocument, relation.getContainingEntity().getName() + "Type");
+                        gmlDocument, relation.getContainingEntity().getGmlInfo().complexTypeName());
         Element sequenceNode =
                 (Element) featureTypeNode.getFirstChild().getFirstChild().getFirstChild();
         // let's proceed with the complex attribute encoding
@@ -112,6 +112,6 @@ public final class GmlSchemaVisitor extends DomainModelVisitorImpl {
     }
 
     public Document getDocument() {
-        return (Document) gmlDocument;
+        return gmlDocument;
     }
 }

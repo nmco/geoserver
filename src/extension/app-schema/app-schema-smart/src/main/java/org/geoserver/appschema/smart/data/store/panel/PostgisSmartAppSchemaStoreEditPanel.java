@@ -1,9 +1,9 @@
 package org.geoserver.appschema.smart.data.store.panel;
 
+import static org.geoserver.appschema.smart.data.PostgisSmartAppSchemaDataAccessFactory.DATASTORE_NAME;
 import static org.geoserver.appschema.smart.data.PostgisSmartAppSchemaDataAccessFactory.DOMAIN_MODEL_EXCLUSIONS;
 import static org.geoserver.appschema.smart.data.PostgisSmartAppSchemaDataAccessFactory.POSTGIS_DATASTORE_METADATA;
 import static org.geoserver.appschema.smart.data.PostgisSmartAppSchemaDataAccessFactory.ROOT_ENTITY;
-import static org.geoserver.appschema.smart.data.PostgisSmartAppSchemaDataAccessFactory.DATASTORE_NAME;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -63,10 +63,13 @@ public class PostgisSmartAppSchemaStoreEditPanel extends StoreEditPanel {
     private SimpleDropDownChoiceParamPanel datastores;
     private SimpleDropDownChoiceParamPanel availableRootEntities;
     private WorkspacePanel workspacePanel;
+
     @SuppressWarnings("rawtypes")
     private TextParamPanel datastoreNamePanel;
+
     @SuppressWarnings("rawtypes")
     private TextParamPanel exclusions;
+
     @SuppressWarnings("rawtypes")
     private TextParamPanel datastorename;
 
@@ -150,30 +153,34 @@ public class PostgisSmartAppSchemaStoreEditPanel extends StoreEditPanel {
                                 target.add(datastores);
                             }
                         });
-        
+
         // search for the datastorename panel
         datastoreNamePanel =
                 (TextParamPanel)
                         PostgisSmartAppSchemaStoreEditPanel.this
                                 .getPage()
                                 .get("dataStoreForm:dataStoreNamePanel");
-        // attach datastore name to hidden text component used to share datastorename with the dataaccessfactory
-        datastoreNamePanel.getFormComponent().add(
-                new AjaxFormComponentUpdatingBehavior("change") {
-					@Override
-					protected void onUpdate(AjaxRequestTarget target) {
-						String name =
-                                ((String)
-                                        datastoreNamePanel.getFormComponent().getModelObject());
-						datastorename.modelChanging();
-                        smartAppSchemaDataStoreInfo
-                                .getConnectionParameters()
-                                .put(DATASTORE_NAME.key, name);
-                        datastorename.modelChanged();
-                        target.add(datastorename);
-					}
-                });
-        
+        // attach datastore name to hidden text component used to share datastorename with the
+        // dataaccessfactory
+        datastoreNamePanel
+                .getFormComponent()
+                .add(
+                        new AjaxFormComponentUpdatingBehavior("change") {
+                            @Override
+                            protected void onUpdate(AjaxRequestTarget target) {
+                                String name =
+                                        ((String)
+                                                datastoreNamePanel
+                                                        .getFormComponent()
+                                                        .getModelObject());
+                                datastorename.modelChanging();
+                                smartAppSchemaDataStoreInfo
+                                        .getConnectionParameters()
+                                        .put(DATASTORE_NAME.key, name);
+                                datastorename.modelChanged();
+                                target.add(datastorename);
+                            }
+                        });
     }
 
     /** Helper method that creates dropdown for postgis datastore selection. */
@@ -334,8 +341,9 @@ public class PostgisSmartAppSchemaStoreEditPanel extends StoreEditPanel {
     }
 
     /**
-     * Helper method that creates a hidden parameters panel, that allows to set the exclusion DomainModel objects (used internally in
-     * the form to keep list of exclusions based on tree selection) and the datastore name that will be shared to the factory.
+     * Helper method that creates a hidden parameters panel, that allows to set the exclusion
+     * DomainModel objects (used internally in the form to keep list of exclusions based on tree
+     * selection) and the datastore name that will be shared to the factory.
      */
     @SuppressWarnings({"rawtypes", "unchecked"})
     protected void buildHiddenParametersPanel(final IModel model) {
@@ -350,7 +358,7 @@ public class PostgisSmartAppSchemaStoreEditPanel extends StoreEditPanel {
         exclusions.getFormComponent().setEnabled(false);
         exclusions.setVisible(false);
         add(exclusions);
-        
+
         iModel = new PropertyModel(model, "connectionParameters");
         datastorename =
                 new TextParamPanel(
